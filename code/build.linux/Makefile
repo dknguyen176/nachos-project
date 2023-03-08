@@ -234,9 +234,10 @@ LIB_C = ../lib/bitmap.cc\
 	../lib/hash.cc\
 	../lib/libtest.cc\
 	../lib/list.cc\
-	../lib/sysdep.cc
+	../lib/sysdep.cc\
+	../lib/utility.cc
 
-LIB_O = bitmap.o debug.o libtest.o sysdep.o
+LIB_O = bitmap.o debug.o libtest.o sysdep.o utility.o
 
 
 MACHINE_H = ../machine/callback.h\
