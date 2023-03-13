@@ -38,8 +38,8 @@
 #include "openfile.h"
 
 #ifdef FILESYS_STUB // Temporarily implement file system calls as
-										// calls to UNIX, until the real file system
-										// implementation is available
+					// calls to UNIX, until the real file system
+					// implementation is available
 
 typedef int OpenFileID;
 
@@ -116,11 +116,11 @@ class FileSystem
 {
 public:
 	FileSystem(bool format); // Initialize the file system.
-													 // Must be called *after* "synchDisk"
-													 // has been initialized.
-													 // If "format", there is nothing on
-													 // the disk, so initialize the directory
-													 // and the bitmap of free blocks.
+							 // Must be called *after* "synchDisk"
+							 // has been initialized.
+							 // If "format", there is nothing on
+							 // the disk, so initialize the directory
+							 // and the bitmap of free blocks.
 
 	bool Create(char *name, int initialSize);
 	// Create a file (UNIX creat)
@@ -135,9 +135,9 @@ public:
 
 private:
 	OpenFile *freeMapFile;	 // Bit map of free disk blocks,
-													 // represented as a file
+							 // represented as a file
 	OpenFile *directoryFile; // "Root" directory -- list of
-													 // file names, represented as a file
+							 // file names, represented as a file
 };
 
 #endif // FILESYS

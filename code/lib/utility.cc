@@ -6,6 +6,16 @@ char *User2System(int virtAddr, int limit)
 {
   int i; // index
   int oneChar;
+  if (limit == -1)
+  {
+    limit = 0;
+    do
+    {
+      kernel->machine->ReadMem(virtAddr + limit, 1, &oneChar);
+      limit++;
+    } while (oneChar != 0);
+  }
+
   char *kernelBuf = NULL;
   kernelBuf = new char[limit + 1]; // need for terminal string
   if (kernelBuf == NULL)

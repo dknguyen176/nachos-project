@@ -36,7 +36,7 @@
 typedef void (*VoidFunctionPtr)(void *arg);
 typedef void (*VoidNoArgFunctionPtr)();
 
-char *User2System(int virtAddr, int limit);
+char *User2System(int virtAddr, int limit = -1);
 int System2User(int virtAddr, int len, char *buffer);
 
 #endif // UTILITY_H
