@@ -35,6 +35,12 @@
 #define SC_ThreadExit 14
 #define SC_ThreadJoin 15
 
+#define SC_OpenSocket 20
+#define SC_Connect 21
+#define SC_Send 22
+#define SC_Receive 23
+#define SC_CloseSocket 24
+
 #define SC_Add 42
 #define SC_PrintString 43
 
@@ -145,6 +151,22 @@ int Seek(int position, OpenFileId id);
  * Return 1 on success, negative error code on failure
  */
 int Close(OpenFileId id);
+
+/* System call for Network operations
+ * Open a Socket
+ * Connect to a Socket via IP and Port
+ * Send and Receive data from Socket
+ * Close a Socket
+ */
+int OpenSocket();
+
+int Connect(int sockID, char *ip, int port);
+
+int Send(int sockID, char *buffer, int len);
+
+int Receive(int sockID, char *buffer, int len);
+
+int CloseSocket(int sockID);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program.

@@ -154,6 +154,46 @@ Seek:
 	j	$31
 	.end Seek
 
+	.globl OpenSocket
+	.ent	OpenSocket
+OpenSocket:
+	addiu $2,$0,SC_OpenSocket
+	syscall
+	j	$31
+	.end OpenSocket
+
+	.globl Connect
+	.ent	Connect
+Connect:
+	addiu $2,$0,SC_Connect
+	syscall
+	j	$31
+	.end Connect
+
+	.globl Send
+	.ent	Send
+Send:
+	addiu $2,$0,SC_Send
+	syscall
+	j	$31
+	.end Send
+
+	.globl Receive
+	.ent	Receive
+Receive:
+	addiu $2,$0,SC_Receive
+	syscall
+	j	$31
+	.end Receive
+
+	.globl CloseSocket
+	.ent	CloseSocket
+CloseSocket:
+	addiu $2,$0,SC_CloseSocket
+	syscall
+	j	$31
+	.end CloseSocket
+
         .globl ThreadFork
         .ent    ThreadFork
 ThreadFork:

@@ -67,7 +67,8 @@ extern "C"
 
 // Interprocess communication operations, for simulating the network
 extern int OpenSocket();
-extern void CloseSocket(int sockID);
+extern int Connect(int sockID, char *ip, int port);
+extern int CloseSocket(int sockID);
 extern void AssignNameToSocket(char *socketName, int sockID);
 extern void DeAssignNameToSocket(char *socketName);
 extern bool PollSocket(int sockID);

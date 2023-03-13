@@ -106,20 +106,23 @@ void ExceptionHandler(ExceptionType which)
 		switch (type)
 		{
 		case SC_Halt:
+		{
 			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 
 			SysHalt();
 
 			ASSERTNOTREACHED();
 			break;
+		}
 
 		case SC_Add:
+		{
 			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 
 			/* Process SysAdd Systemcall*/
 			int result;
 			result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-							/* int op2 */ (int)kernel->machine->ReadRegister(5));
+											/* int op2 */ (int)kernel->machine->ReadRegister(5));
 
 			DEBUG(dbgSys, "Add returning with " << result << "\n");
 			/* Prepare Result */
@@ -133,6 +136,7 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 
 			break;
+		}
 
 		case SC_Create:
 		{
@@ -244,6 +248,7 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+
 		case SC_Read:
 		{
 			int fid;
@@ -324,6 +329,7 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+
 		case SC_Write:
 		{
 			int fid;
@@ -392,6 +398,7 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+
 		case SC_Seek:
 		{
 			int pos;
@@ -457,6 +464,7 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+
 		case SC_PrintString:
 		{
 			char *s;
@@ -477,6 +485,7 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+
 		case SC_Remove:
 		{
 			char *filename = readFilename(4);
@@ -516,13 +525,45 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
+		case SC_OpenSocket:
+		{
+			DEBUG('a', "\n SC_OpenSocket call ...");
+
+			OpenFile *file = kernel->fileSystem->_OpenSocket();
+			if (!file)
+			{
+				printf("\n Error open socket");
+				kernel->machine->WriteRegister(2, (int)-1);
+
+				/* Modify return point */
+				recoverPC();
+
+				return;
+			}
+			printf("\n Open socket succesfully, file descriptor %d\n", file->FileDescriptor());
+
+			kernel->machine->WriteRegister(2, (int)file->FileDescriptor()); // trả về cho chương trình
+			// người dùng thành công
+
+			/* Modify return point */
+			recoverPC();
+
+			return;
+
+			ASSERTNOTREACHED();
+
+			break;
+		}
+
 		default:
 		{
 			cerr << "Unexpected system call " << type << "\n";
 			break;
 		}
 		}
+
 		break;
+
 	default:
 		cerr << "Unexpected user mode exception" << (int)which << "\n";
 		break;

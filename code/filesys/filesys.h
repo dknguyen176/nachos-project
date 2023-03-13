@@ -117,6 +117,21 @@ public:
 
 	bool Remove(char *name) { return Unlink(name) == 0; }
 
+	OpenFile *_OpenSocket()
+	{
+		int fd = OpenSocket();
+
+		// Find an empty slot in the table
+		for (int i = 0; i < TABLESIZE; i++)
+			if (table[i] == NULL)
+			{
+				table[i] = new OpenFile(fd);
+				return table[i];
+			}
+
+		return NULL;
+	}
+
 private:
 	OpenFile *table[TABLESIZE];
 };

@@ -438,7 +438,7 @@ int OpenSocket()
 //  Returns 0 if the connection is successful, and -1 if it fails.
 //----------------------------------------------------------------------
 
-int ConnectSocket(int sockID, char *ip, int port)
+int Connect(int sockID, char *ip, int port)
 {
     struct sockaddr_in serv_addr;
     serv_addr.sin_family = AF_INET;
@@ -467,9 +467,10 @@ int ConnectSocket(int sockID, char *ip, int port)
 // 	Close the IPC connection.
 //----------------------------------------------------------------------
 
-void CloseSocket(int sockID)
+int CloseSocket(int sockID)
 {
-    (void)close(sockID);
+    int result = close(sockID);
+    return result;
 }
 
 //----------------------------------------------------------------------
