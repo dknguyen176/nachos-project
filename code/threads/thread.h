@@ -96,12 +96,12 @@ public:
 
   void Fork(VoidFunctionPtr func, void *arg);
   // Make thread run (*func)(arg)
-  void Yield(); // Relinquish the CPU if any
-                // other thread is runnable
+  void Yield();               // Relinquish the CPU if any
+                              // other thread is runnable
   void Sleep(bool finishing); // Put the thread to sleep and
                               // relinquish the processor
-  void Begin();  // Startup code for the thread
-  void Finish(); // The thread is done executing
+  void Begin();               // Startup code for the thread
+  void Finish();              // The thread is done executing
 
   void CheckOverflow(); // Check if thread stack has overflowed
   void setStatus(ThreadStatus st) { status = st; }
@@ -112,9 +112,9 @@ public:
 private:
   // some of the private data for this class is listed above
 
-  int *stack; // Bottom of the stack
-              // NULL if this is the main thread
-              // (If NULL, don't deallocate stack)
+  int *stack;          // Bottom of the stack
+                       // NULL if this is the main thread
+                       // (If NULL, don't deallocate stack)
   ThreadStatus status; // ready, running or blocked
   char *name;
 

@@ -119,7 +119,7 @@ void ExceptionHandler(ExceptionType which)
 			/* Process SysAdd Systemcall*/
 			int result;
 			result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-							/* int op2 */ (int)kernel->machine->ReadRegister(5));
+											/* int op2 */ (int)kernel->machine->ReadRegister(5));
 
 			DEBUG(dbgSys, "Add returning with " << result << "\n");
 			/* Prepare Result */
@@ -325,6 +325,7 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+
 		case SC_PrintString:
 		{
 			char *s;
@@ -348,8 +349,8 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Remove:
 		{
-			filename = new char[MAXFILELENGTH + 1];
-			virtAddr = kernel->machine->ReadRegister(4);
+			char *filename = new char[MAXFILELENGTH + 1];
+			int virtAddr = kernel->machine->ReadRegister(4);
 			filename = User2System(virtAddr, MAXFILELENGTH);
 
 			if (!kernel->fileSystem->Remove(filename))
@@ -370,6 +371,10 @@ void ExceptionHandler(ExceptionType which)
 				/* set next programm counter for brach execution */
 				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
 			}
+
+			return;
+
+			ASSERTNOTREACHED();
 
 			break;
 		}

@@ -170,11 +170,11 @@ openfile: openfile.o start.o
 	$(LD) $(LDFLAGS) start.o openfile.o -o openfile.coff
 	$(COFF2NOFF) openfile.coff openfile
 	
-close.o: close.c
-	$(CC) $(CFLAGS) -c close.c
-close: close.o start.o
-	$(LD) $(LDFLAGS) start.o close.o -o close.coff
-	$(COFF2NOFF) close.coff close
+closefile.o: closefile.c
+	$(CC) $(CFLAGS) -c closefile.c
+closefile: closefile.o start.o
+	$(LD) $(LDFLAGS) start.o closefile.o -o closefile.coff
+	$(COFF2NOFF) closefile.coff closefile
 
 readsc: readsc.c
 	$(CC) $(CFLAGS) -c readsc.c
