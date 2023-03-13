@@ -119,7 +119,7 @@ void ExceptionHandler(ExceptionType which)
 			/* Process SysAdd Systemcall*/
 			int result;
 			result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-											/* int op2 */ (int)kernel->machine->ReadRegister(5));
+							/* int op2 */ (int)kernel->machine->ReadRegister(5));
 
 			DEBUG(dbgSys, "Add returning with " << result << "\n");
 			/* Prepare Result */
@@ -244,7 +244,6 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
-
 		case SC_Read:
 		{
 			int fid;
@@ -325,7 +324,74 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+		case SC_Write:
+		{
+			int fid;
+			char *buffer;
+			int charcount;
+			DEBUG('a', "\n SC_Write call ...");
 
+			DEBUG('a', "\n Reading virtual address of buffer");
+			// Lấy tham số char* buffer từ thanh ghi r4
+			int virtAddr = (kernel->machine->ReadRegister(4));
+
+			DEBUG('a', "\n Reading character count");
+			// Lấy tham số char count từ thanh ghi r5
+			charcount = kernel->machine->ReadRegister(5);
+
+			DEBUG('a', "\n Reading file descriptor");
+			// Lấy file descriptor từ thanh ghi r6
+			fid = kernel->machine->ReadRegister(6);
+
+			buffer = User2System(virtAddr, charcount);
+			// Thu gọn charcount
+			charcount = strlen(buffer);
+
+			// Nếu file descriptor == ConsoleInput thì viết từ bàn phím
+			if (fid == _ConsoleOutput)
+				charcount = SysWriteConsole(buffer, charcount);
+			// Nếu file descriptor > 1 và filedescriptor < 20 thì viết ra file
+			else if (fid > 1 && fid < 20)
+			{
+				// Lấy openfile từ file descriptor
+				OpenFile *file = kernel->fileSystem->Find(fid);
+				if (file == NULL)
+				{
+					printf("\n Invalid file descriptor");
+					kernel->machine->WriteRegister(2, -1);
+					delete buffer;
+					recoverPC();
+					return;
+				}
+
+				// Viết ra charcount kí tự vào file
+				charcount = file->Write(buffer, charcount);
+			}
+			// file descriptor không hợp lệ
+			else
+			{
+				printf("\n Invalid file descriptor.");
+				kernel->machine->WriteRegister(2, -1);
+				delete buffer;
+				recoverPC();
+				return;
+			}
+
+			printf("\n Success writing.");
+			// Trả về cho chương trình người dùng số lượng ký tự đã viết
+			kernel->machine->WriteRegister(2, charcount);
+
+			delete buffer;
+
+			/* Modify return point */
+			recoverPC();
+
+			return;
+
+			ASSERTNOTREACHED();
+
+			break;
+		}
 		case SC_PrintString:
 		{
 			char *s;
@@ -346,12 +412,10 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
-
 		case SC_Remove:
 		{
-			char *filename = new char[MAXFILELENGTH + 1];
 			int virtAddr = kernel->machine->ReadRegister(4);
-			filename = User2System(virtAddr, MAXFILELENGTH);
+			char *filename = User2System(virtAddr, MAXFILELENGTH);
 
 			if (!kernel->fileSystem->Remove(filename))
 			{
@@ -371,7 +435,6 @@ void ExceptionHandler(ExceptionType which)
 				/* set next programm counter for brach execution */
 				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
 			}
-
 			return;
 
 			ASSERTNOTREACHED();
@@ -380,8 +443,10 @@ void ExceptionHandler(ExceptionType which)
 		}
 
 		default:
+		{
 			cerr << "Unexpected system call " << type << "\n";
 			break;
+		}
 		}
 		break;
 	default:

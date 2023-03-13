@@ -34,9 +34,17 @@ int SysReadConsole(char *buffer, int limit)
     buffer[i] = c;
     i++;
   } while (c != '\n' && i < limit);
-  buffer[i] = '\0';
+  buffer[i - 1] = '\0';
   limit = i;
   return limit;
+}
+
+int SysWriteConsole(char *buffer, int limit)
+{
+  int i;
+  for (i = 0; i < limit && buffer[i] != '\0'; i++)
+    kernel->synchConsoleOut->PutChar(buffer[i]);
+  return i;
 }
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */
