@@ -33,6 +33,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <cerrno>
+#include <arpa/inet.h>
 
 #ifdef SOLARIS
 // KMS
@@ -429,6 +430,36 @@ int OpenSocket()
     ASSERT(sockID >= 0);
 
     return sockID;
+}
+
+//----------------------------------------------------------------------
+// ConnectSocket
+// 	Connect to server according to IP and port information.
+//  Returns 0 if the connection is successful, and -1 if it fails.
+//----------------------------------------------------------------------
+
+int ConnectSocket(int sockID, char *ip, int port)
+{
+    struct sockaddr_in serv_addr;
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
+
+    // Convert IPv4 and IPv6 addresses from text to binary
+    // form
+    if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0)
+    {
+        printf("\nInvalid address/ Address not supported \n");
+        return -1;
+    }
+
+    if (connect(sockID, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        printf("\nConnection Failed \n");
+        return -1;
+    }
+
+    printf("\nConnection Successful \n");
+    return 0;
 }
 
 //----------------------------------------------------------------------
