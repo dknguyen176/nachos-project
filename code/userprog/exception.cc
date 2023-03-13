@@ -414,27 +414,36 @@ void ExceptionHandler(ExceptionType which)
 		}
 		case SC_Remove:
 		{
-			int virtAddr = kernel->machine->ReadRegister(4);
-			char *filename = User2System(virtAddr, MAXFILELENGTH);
+			char *filename = readFilename(4);
+
+			if (!filename)
+			{
+				kernel->machine->WriteRegister(2, -1);
+				return;
+			}
+
+			// check if is open
+			// OpenFile *openFile = kernel->fileSystem->Open(filename);
+			// if (openFile != nullptr)
+			// {
+			// 	delete openFile;
+			// 	printf("Error: File '%s' is currently open and cannot be removed.\n", filename);
+			// 	kernel->machine->WriteRegister(2, -1);
+			// 	return;
+			// }
 
 			if (!kernel->fileSystem->Remove(filename))
 			{
 				printf("Error: Could not remove file '%s'\n", filename);
+				kernel->machine->WriteRegister(2, -1);
+				return;
 			}
 
 			delete[] filename;
 
 			/* Modify return point */
-			{
-				/* set previous programm counter (debugging only)*/
-				kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			recoverPC();
 
-				/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-				kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-				/* set next programm counter for brach execution */
-				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-			}
 			return;
 
 			ASSERTNOTREACHED();
