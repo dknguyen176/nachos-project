@@ -48,6 +48,51 @@
 //	is in machine.h.
 //----------------------------------------------------------------------
 
+int readInt(int reg)
+{
+	DEBUG('a', "\n Reading integer number");
+
+	int num = kernel->machine->ReadRegister(reg);
+
+	return num;
+}
+char *readFilename(int reg)
+{
+	int virtAddr;
+	char *filename;
+	DEBUG('a', "\n Reading virtual address of filename");
+
+	// Lấy tham số tên tập tin từ thanh ghi reg
+	virtAddr = kernel->machine->ReadRegister(reg);
+	DEBUG('a', "\n Reading filename.");
+
+	// MaxFileLength là = 32
+	filename = User2System(virtAddr, MAXFILELENGTH);
+	return filename;
+	if (filename == NULL)
+	{
+		printf("\n Not enough memory in system");
+		DEBUG('a', "\n Not enough memory in system");
+		kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương trình người dùng
+	}
+	else
+	{
+		DEBUG('a', "\n Finish reading filename.");
+	}
+
+	return filename;
+}
+void recoverPC()
+{
+	/* set previous programm counter (debugging only)*/
+	kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+	/* set next programm counter for brach execution */
+	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+}
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -80,16 +125,7 @@ void ExceptionHandler(ExceptionType which)
 			kernel->machine->WriteRegister(2, (int)result);
 
 			/* Modify return point */
-			{
-				/* set previous programm counter (debugging only)*/
-				kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-				/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-				kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-				/* set next programm counter for brach execution */
-				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-			}
+			recoverPC();
 
 			return;
 
@@ -98,28 +134,14 @@ void ExceptionHandler(ExceptionType which)
 			break;
 
 		case SC_Create:
-			int virtAddr;
-			char *filename;
+		{
 			DEBUG('a', "\n SC_Create call ...");
-			DEBUG('a', "\n Reading virtual address of filename");
 
-			// Lấy tham số tên tập tin từ thanh ghi r4
-			virtAddr = kernel->machine->ReadRegister(4);
-			DEBUG('a', "\n Reading filename.");
-
-			// MaxFileLength là = 32
-			filename = User2System(virtAddr, MAXFILELENGTH);
-			if (filename == NULL)
-			{
-				printf("\n Not enough memory in system");
-				DEBUG('a', "\n Not enough memory in system");
-				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
-				// trình người dùng
-				delete filename;
+			char *filename = readFilename(4);
+			if (!filename)
 				return;
-			}
-			DEBUG('a', "\n Finish reading filename.");
 			// DEBUG('a',"\n File name : '"<<filename<<"'");
+
 			//  Create file with size = 0
 			//  Dùng đối tượng fileSystem của lớp OpenFile để tạo file,
 			//  việc tạo file này là sử dụng các thủ tục tạo file của hệ điều
@@ -131,17 +153,96 @@ void ExceptionHandler(ExceptionType which)
 				printf("\n Error create file '%s'", filename);
 				kernel->machine->WriteRegister(2, -1);
 				delete filename;
+
+				/* Modify return point */
+				recoverPC();
+
 				return;
 			}
-			kernel->machine->WriteRegister(2, 0); // trả về cho chương trình
+			printf("\n Successful create file '%s'", filename);
+			kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
 			// người dùng thành công
 			delete filename;
+
+			/* Modify return point */
+			recoverPC();
 
 			return;
 
 			ASSERTNOTREACHED();
 
 			break;
+		}
+
+		case SC_Open:
+		{
+			DEBUG('a', "\n SC_Open call ...");
+
+			char *filename = readFilename(4);
+			if (!filename)
+				return;
+
+			int type = readInt(5);
+
+			OpenFile *file = kernel->fileSystem->Open(filename, type);
+			if (!file)
+			{
+				printf("\n Error open file '%s'", filename);
+				kernel->machine->WriteRegister(2, (int)-1);
+				delete filename;
+
+				/* Modify return point */
+				recoverPC();
+
+				return;
+			}
+			printf("\n Open file '%s' succesfully, file descriptor %d\n", filename, file->FileDescriptor());
+
+			kernel->machine->WriteRegister(2, (int)file->FileDescriptor()); // trả về cho chương trình
+			// người dùng thành công
+			delete filename;
+
+			/* Modify return point */
+			recoverPC();
+
+			return;
+
+			ASSERTNOTREACHED();
+
+			break;
+		}
+
+		case SC_Close:
+		{
+			DEBUG('a', "\n SC_Close call ...");
+
+			int file = readInt(4);
+
+			int result = kernel->fileSystem->_Close(file);
+			if (result == -1)
+			{
+				printf("\n Error close file with id '%d'", file);
+				kernel->machine->WriteRegister(2, (int)-1);
+
+				/* Modify return point */
+				recoverPC();
+
+				return;
+			}
+			printf("\n Close file succesfully, file descriptor %d\n", file);
+
+			kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
+			// người dùng thành công
+
+			/* Modify return point */
+			recoverPC();
+
+			return;
+
+			ASSERTNOTREACHED();
+
+			break;
+		}
 
 		default:
 			cerr << "Unexpected system call " << type << "\n";
