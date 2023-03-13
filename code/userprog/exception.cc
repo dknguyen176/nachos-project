@@ -392,6 +392,71 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+		case SC_Seek:
+		{
+			int pos;
+			int fid;
+			DEBUG('a', "\n SC_Seek call ...");
+
+			DEBUG('a', "\n Reading pos");
+			// Lấy tham số pos từ thanh ghi r4
+			pos = (kernel->machine->ReadRegister(4));
+
+			DEBUG('a', "\n Reading file descriptor");
+			// Lấy file descriptor từ thanh ghi r5
+			fid = kernel->machine->ReadRegister(5);
+
+			// Nếu file descriptor > 1 và filedescriptor < 20 thì đọc từ file
+			if (fid > 1 && fid < 20)
+			{
+				// Lấy openfile từ file descriptor
+				OpenFile *file = kernel->fileSystem->Find(fid);
+				if (file == NULL)
+				{
+					printf("\n Invalid file descriptor");
+					kernel->machine->WriteRegister(2, -1);
+					recoverPC();
+					return;
+				}
+
+				// Nếu pos = -1 thì đặt con trỏ file tại vị trí cuối file
+				if (pos == -1 || pos > file->Length())
+					pos = file->Length();
+				// Nếu pos không hợp lệ thì trả về lỗi
+				else if (pos < 0)
+				{
+					printf("\n Invalid position.");
+					kernel->machine->WriteRegister(2, -1);
+					recoverPC();
+					return;
+				}
+
+				// Đặt con trỏ file tại vị trí pos
+				file->Seek(pos);
+			}
+			// file descriptor không hợp lệ
+			else
+			{
+				printf("\n Invalid file descriptor.");
+				kernel->machine->WriteRegister(2, -1);
+				recoverPC();
+				return;
+			}
+
+			printf("\n Success Seek.");
+
+			// Trả về vị trí của con trỏ sau khi được dịch chuyển
+			kernel->machine->WriteRegister(2, pos);
+
+			/* Modify return point */
+			recoverPC();
+
+			return;
+
+			ASSERTNOTREACHED();
+
+			break;
+		}
 		case SC_PrintString:
 		{
 			char *s;
