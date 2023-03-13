@@ -350,6 +350,32 @@ void ExceptionHandler(ExceptionType which)
 
 			ASSERTNOTREACHED();
 
+		case SC_Remove:
+			filename = new char[MAXFILELENGTH + 1];
+			virtAddr = kernel->machine->ReadRegister(4);
+			filename = User2System(virtAddr, MAXFILELENGTH);
+
+			if (!kernel->fileSystem->Remove(filename))
+			{
+				printf("Error: Could not remove file '%s'\n", filename);
+			}
+
+			delete[] filename;
+
+			/* Modify return point */
+			{
+				/* set previous programm counter (debugging only)*/
+				kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+				/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+				kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+				/* set next programm counter for brach execution */
+				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			}
+
+			break;
+
 			break;
 		}
 		default:
