@@ -343,7 +343,11 @@ void ExceptionHandler(ExceptionType which)
 
 			ASSERTNOTREACHED();
 
+			break;
+		}
+
 		case SC_Remove:
+		{
 			filename = new char[MAXFILELENGTH + 1];
 			virtAddr = kernel->machine->ReadRegister(4);
 			filename = User2System(virtAddr, MAXFILELENGTH);
@@ -368,9 +372,8 @@ void ExceptionHandler(ExceptionType which)
 			}
 
 			break;
-
-			break;
 		}
+
 		default:
 			cerr << "Unexpected system call " << type << "\n";
 			break;
