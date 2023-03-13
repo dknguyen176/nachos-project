@@ -278,33 +278,29 @@ void ExceptionHandler(ExceptionType which)
 			}
 
 			// Nếu file descriptor == ConsoleInput thì đọc từ bàn phím
-			if (fid == ConsoleInput)
-			{
-				printf("\n Take input from keyboard: ");
-				char c;
-				int i = 0;
-				do
-				{
-					c = getchar();
-					buffer[i] = c;
-					i++;
-				} while (c != '\n' && i < charcount);
-				buffer[i] = '\0';
-				charcount = i;
-			}
+			if (fid == _ConsoleInput)
+				charcount = SysReadConsole(buffer, charcount);
 			// Nếu file descriptor > 1 và filedescriptor < 20 thì đọc từ file
 			else if (fid > 1 && fid < 20)
 			{
-				// Lưu giá trị vào buffer từ file descriptor fid
-				// Đoạn này đợi Khoa đã nhé copilot
+				// Lấy openfile từ file descriptor
+				OpenFile *file = kernel->fileSystem->Find(fid);
+				if (file == NULL)
+				{
+					printf("\n Invalid file descriptor");
+					kernel->machine->WriteRegister(2, -1);
+					delete buffer;
+					recoverPC();
+					return;
+				}
 
-				// OpenFile* openfile = kernel->fileSystem->Open(fid);
-				// openfile->Read(buffer, charcount);
+				// Đọc ra charcount kí tự từ file
+				charcount = file->Read(buffer, charcount);
 			}
 			// file descriptor không hợp lệ
 			else
 			{
-				printf("\n Error reading.");
+				printf("\n Invalid file descriptor.");
 				kernel->machine->WriteRegister(2, -1);
 				delete buffer;
 				recoverPC();
@@ -333,15 +329,12 @@ void ExceptionHandler(ExceptionType which)
 		{
 			char *s;
 			DEBUG('a', "\n SC_PrintString call ...");
-
 			// Lấy tham số xâu từ thanh ghi r4
 			int virtAddr = (kernel->machine->ReadRegister(4));
-
 			// Lấy xâu từ bộ nhớ ảo của chương trình người dùng
 			s = User2System(virtAddr);
-
 			// In xâu ra màn hình
-			printf("\n Printed string: %s", s);
+			printf("\n Printed string: %s \n", s);
 
 			/* Modify return point */
 			recoverPC();

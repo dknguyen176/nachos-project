@@ -105,6 +105,14 @@ public:
 		return -1;
 	}
 
+	OpenFile *Find(int id)
+	{
+		for (int i = 0; i < TABLESIZE; i++)
+			if (table[i] != NULL && table[i]->FileDescriptor() == id)
+				return table[i];
+		return NULL;
+	}
+
 	bool Remove(char *name) { return Unlink(name) == 0; }
 
 private:
