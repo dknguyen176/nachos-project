@@ -42,7 +42,113 @@
 // Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
-#ifndef FILESYS_STUB
+#ifdef FILESYS_STUB
+
+#include "filesys.h"
+
+FileSystem::FileSystem()
+{
+    table[0] = new OpenFile(0);
+    table[1] = new OpenFile(1);
+    for (int i = 2; i < TABLESIZE; i++)
+        table[i] = NULL;
+}
+
+bool FileSystem::Create(char *name)
+{
+    int fileDescriptor = OpenForWrite(name);
+
+    if (fileDescriptor == -1)
+        return FALSE;
+    Close(fileDescriptor);
+    return TRUE;
+}
+
+OpenFile *FileSystem::Open(char *name, int type)
+{
+    int fileDescriptor = -1;
+
+    if (type == 0)
+        fileDescriptor = OpenForReadWrite(name, FALSE);
+    else if (type == 1)
+        fileDescriptor = OpenForRead(name);
+
+    if (fileDescriptor == -1)
+        return NULL;
+
+    // Check if the file is already open
+    for (int i = 0; i < TABLESIZE; i++)
+        if (table[i] != NULL && table[i]->FileDescriptor() == fileDescriptor)
+            return table[i];
+
+    // Find an empty slot in the table
+    for (int i = 0; i < TABLESIZE; i++)
+        if (table[i] == NULL)
+        {
+            table[i] = new OpenFile(fileDescriptor);
+            return table[i];
+        }
+
+    return NULL; // Out of space
+}
+
+int FileSystem::_Close(OpenFileID id)
+{
+    // Find file in table
+    for (int i = 0; i < TABLESIZE; i++)
+        if (table[i] != NULL && table[i]->FileDescriptor() == id)
+        {
+            delete table[i];
+            table[i] = NULL;
+            return 0;
+        }
+    return -1;
+}
+
+OpenFile *FileSystem::Find(int id)
+{
+    for (int i = 0; i < TABLESIZE; i++)
+        if (table[i] != NULL && table[i]->FileDescriptor() == id)
+            return table[i];
+    return NULL;
+}
+
+bool FileSystem::Remove(char *name) { return Unlink(name) == 0; }
+
+OpenFile *FileSystem::_OpenSocket()
+{
+    int fd = OpenSocket2();
+
+    // Find an empty slot in the table
+    for (int i = 0; i < TABLESIZE; i++)
+        if (table[i] == NULL)
+        {
+            table[i] = new OpenFile(fd);
+            return table[i];
+        }
+
+    return NULL;
+}
+
+int FileSystem::_Connect(int sockID, char *ip, int port)
+{
+    int result = Connect(sockID, ip, port);
+    return result;
+}
+
+int FileSystem::_Send(int sockID, char *buffer, int size)
+{
+    int result = SendSocket(sockID, buffer, size);
+    return result;
+}
+
+int FileSystem::_Receive(int sockID, char *buffer, int size)
+{
+    int result = ReceiveSocket(sockID, buffer, size);
+    return result;
+}
+
+#else
 
 #include "copyright.h"
 #include "debug.h"
@@ -341,4 +447,4 @@ void FileSystem::Print()
     delete directory;
 }
 
-#endif // FILESYS_STUB
+#endif
