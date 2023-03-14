@@ -43,6 +43,7 @@
 
 #define SC_Add 42
 #define SC_PrintString 43
+#define SC_PrintInt 44
 
 #ifndef IN_ASM
 
@@ -60,6 +61,8 @@
 void Halt();
 
 void PrintString(char *s);
+
+void PrintInt(int n);
 
 /*
  * Add the two operants and return the result

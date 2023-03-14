@@ -117,6 +117,10 @@ void ExceptionHandler(ExceptionType which)
 			SyscallPrintString();
 			return;
 
+		case SC_PrintInt:
+			SyscallPrintInt();
+			return;
+
 		case SC_Remove:
 			SyscallRemoveFile();
 			return;

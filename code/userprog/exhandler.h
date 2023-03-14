@@ -16,6 +16,7 @@ extern char *readChars(int reg);
 extern void recoverPC();
 
 extern void SyscallPrintString();
+extern void SyscallPrintInt();
 
 // File exception handler
 extern void SyscallCreateFile();

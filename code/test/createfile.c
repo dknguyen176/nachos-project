@@ -3,18 +3,19 @@
 
 #define maxlen 32
 
-int main()
+int main(int argc, char *argv[])
 {
-  int len;
-  char filename[maxlen + 1];
+
+  PrintInt(argc);
+
   /*Create a file*/
   if (Create("text.txt") == -1)
   {
-    // xuất thông báo lỗi tạo tập tin
+    PrintString("Create file error");
   }
   else
   {
-    // xuất thông báo tạo tập tin thành công
+    PrintString("Create file successful");
   }
   Halt();
 }

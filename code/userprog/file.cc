@@ -22,6 +22,19 @@ void SyscallPrintString()
   recoverPC();
 }
 
+void SyscallPrintInt()
+{
+  DEBUG('a', "\n SC_PrintInt call ...");
+
+  int i = readInt(4);
+
+  // In số ra màn hình
+  printf("\n Printed int: %d \n", i);
+
+  /* Modify return point */
+  recoverPC();
+}
+
 void SyscallCreateFile()
 {
   DEBUG('a', "\n SC_Create call ...");
@@ -123,8 +136,6 @@ void SyscallCloseFile()
 
 void SyscallReadFile()
 {
-  int fid;
-
   DEBUG('a', "\n SC_Read call ...");
 
   int virtAddr = (kernel->machine->ReadRegister(4));
@@ -185,7 +196,7 @@ void SyscallWriteFile()
   int fid = readInt(6);
 
   // Thu gọn charcount
-  charcount = min(charcount, strlen(buffer));
+  charcount = min(charcount, (int)strlen(buffer));
 
   // TODO: Check console input
 
@@ -280,16 +291,16 @@ void SyscallRemoveFile()
     return;
   }
 
-  // check if is open
-  OpenFile *file = kernel->fileSystem->Find(filename);
-  if (file != nullptr)
-  {
-    printf("Error: File '%s' is currently open and cannot be removed.\n", filename);
-    kernel->machine->WriteRegister(2, -1);
-    delete filename;
-    recoverPC();
-    return;
-  }
+  // TODO: check if is open
+  // OpenFile *file = kernel->fileSystem->Find(filename); // Find use fid
+  // if (file != nullptr)
+  // {
+  //   printf("Error: File '%s' is currently open and cannot be removed.\n", filename);
+  //   kernel->machine->WriteRegister(2, -1);
+  //   delete filename;
+  //   recoverPC();
+  //   return;
+  // }
 
   if (!kernel->fileSystem->Remove(filename))
   {
