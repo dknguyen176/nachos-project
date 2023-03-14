@@ -12,7 +12,7 @@ int main()
     */
 
     // Write to file
-    /*
+
     OpenFileId fd = Open("text.txt", 0);
     // OpenFileId fd = Open("text.txt", 1); // Dòng này sẽ báo lỗi vì mở read-only file
 
@@ -20,7 +20,6 @@ int main()
     Read(buffer, 100, 0);
     Write(buffer, 100, fd);
     Close(fd);
-    */
 
     Halt();
 }

@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments createfile openfile closefile readsc writesc removefile seek socket
+PROGRAMS = add halt shell matmult sort segments createfile openfile closefile readsc writesc removefile seek socket copy
 
 endif
 
@@ -209,6 +209,12 @@ socket: socket.o start.o
 clean:
 	$(RM) -f *.o *.ii
 	$(RM) -f *.coff
+
+copy.o: copy.c 
+	$(CC) $(CFLAGS) -c copy.c 
+copy: copy.o start.o 
+	$(LD) $(LDFLAGS) start.o copy.o -o copy.coff 
+	$(COFF2NOFF) copy.coff copy 
 
 distclean: clean
 	$(RM) -f $(PROGRAMS)
