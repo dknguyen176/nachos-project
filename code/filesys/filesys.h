@@ -119,7 +119,7 @@ public:
 
 	OpenFile *_OpenSocket()
 	{
-		int fd = OpenSocket();
+		int fd = OpenSocket2();
 
 		// Find an empty slot in the table
 		for (int i = 0; i < TABLESIZE; i++)
@@ -130,6 +130,12 @@ public:
 			}
 
 		return NULL;
+	}
+
+	int _Connect(int sockID, char *ip, int port)
+	{
+		int result = Connect(sockID, ip, port);
+		return result;
 	}
 
 private:

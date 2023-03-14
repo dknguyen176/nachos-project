@@ -433,6 +433,23 @@ int OpenSocket()
 }
 
 //----------------------------------------------------------------------
+// OpenSocket2 - used for socket app that connect to the internet
+// 	Open an interprocess communication (IPC) connection.  For now,
+//	just open a datagram port where other Nachos (simulating
+//	workstations on a network) can send messages to this Nachos.
+//----------------------------------------------------------------------
+
+int OpenSocket2()
+{
+    int sockID;
+
+    sockID = socket(AF_INET, SOCK_STREAM, 0);
+    ASSERT(sockID >= 0);
+
+    return sockID;
+}
+
+//----------------------------------------------------------------------
 // ConnectSocket
 // 	Connect to server according to IP and port information.
 //  Returns 0 if the connection is successful, and -1 if it fails.
