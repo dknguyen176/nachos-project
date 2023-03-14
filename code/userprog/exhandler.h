@@ -31,5 +31,7 @@ extern void SyscallRemoveFile();
 extern void SyscallOpenSocket();
 extern void SyscallConnectSocket();
 extern void SyscallCloseSocket();
+extern void SyscallSendSocket();
+extern void SyscallReceiveSocket();
 
 #endif // EXCEPTION_UTILITY_H

@@ -73,7 +73,7 @@ void ExceptionHandler(ExceptionType which)
 			/* Process SysAdd Systemcall*/
 			int result;
 			result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-											/* int op2 */ (int)kernel->machine->ReadRegister(5));
+							/* int op2 */ (int)kernel->machine->ReadRegister(5));
 
 			DEBUG(dbgSys, "Add returning with " << result << "\n");
 			/* Prepare Result */
@@ -135,6 +135,14 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_CloseSocket:
 			SyscallCloseSocket();
+			return;
+
+		case SC_Send:
+			SyscallSendSocket();
+			return;
+
+		case SC_Receive:
+			SyscallReceiveSocket();
 			return;
 
 		default:

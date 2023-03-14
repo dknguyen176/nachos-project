@@ -541,6 +541,26 @@ bool PollSocket(int sockID)
 }
 
 //----------------------------------------------------------------------
+// ReceiveSocket
+// 	Read a fixed size packet off the IPC port.  Abort on error.
+//----------------------------------------------------------------------
+int ReceiveSocket(int sockID, char *buffer, int packetSize)
+{
+    int retVal = recv(sockID, buffer, packetSize, 0);
+    return retVal;
+}
+
+//----------------------------------------------------------------------
+// SendSocket
+// 	Transmit a fixed size packet to another Nachos' IPC port.
+//----------------------------------------------------------------------
+int SendSocket(int sockID, char *buffer, int packetSize)
+{
+    int retVal = send(sockID, buffer, packetSize, 0);
+    return retVal;
+}
+
+//----------------------------------------------------------------------
 // ReadFromSocket
 // 	Read a fixed size packet off the IPC port.  Abort on error.
 //----------------------------------------------------------------------

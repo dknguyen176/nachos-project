@@ -44,22 +44,34 @@ int main(int argc, char const *argv[])
     perror("bind failed");
     exit(EXIT_FAILURE);
   }
-  if (listen(server_fd, 3) < 0)
-  {
-    perror("listen");
-    exit(EXIT_FAILURE);
-  }
-  if ((new_socket = accept(server_fd, (struct sockaddr *)&address,
-                           (socklen_t *)&addrlen)) < 0)
-  {
-    perror("accept");
-    exit(EXIT_FAILURE);
-  }
-  valread = read(new_socket, buffer, 1024);
-  printf("%s\n", buffer);
-  send(new_socket, hello, strlen(hello), 0);
-  printf("Hello message sent\n");
 
+  while (1) // Treo server để client có thể kết nối lại nhiều lần
+  {
+    if (listen(server_fd, 3) < 0)
+    {
+      perror("listen");
+      exit(EXIT_FAILURE);
+    }
+    if ((new_socket = accept(server_fd, (struct sockaddr *)&address,
+                             (socklen_t *)&addrlen)) < 0)
+    {
+      perror("accept");
+      exit(EXIT_FAILURE);
+    }
+    // Thử lại 10 lần để gửi tin nhắn cho client
+    for (int retryCount = 0; retryCount < 10; retryCount++)
+    {
+      int retVal = send(new_socket, "Hello from server", 17, 0);
+      if (retVal == 17)
+        break;
+      sleep(1);
+    }
+
+    // Nhận tin nhắn từ client
+    valread = read(new_socket, buffer, 1024);
+    printf("%s\n", buffer);
+    printf("Hello message sent\n");
+  }
   // closing the connected socket
   close(new_socket);
   // closing the listening socket

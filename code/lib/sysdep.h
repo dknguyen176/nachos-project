@@ -73,6 +73,8 @@ extern int CloseSocket(int sockID);
 extern void AssignNameToSocket(char *socketName, int sockID);
 extern void DeAssignNameToSocket(char *socketName);
 extern bool PollSocket(int sockID);
+extern int ReceiveSocket(int sockID, char *buffer, int packetSize);
+extern int SendSocket(int sockID, char *buffer, int packetSize);
 extern void ReadFromSocket(int sockID, char *buffer, int packetSize);
 extern void SendToSocket(int sockID, char *buffer, int packetSize, char *toName);
 
