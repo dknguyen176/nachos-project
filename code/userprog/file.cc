@@ -1,15 +1,22 @@
 #include "exhandler.h"
+#include <stdlib.h>
 
 void SyscallPrintString()
 {
-  char *s;
   DEBUG('a', "\n SC_PrintString call ...");
-  // Lấy tham số xâu từ thanh ghi r4
-  int virtAddr = (kernel->machine->ReadRegister(4));
-  // Lấy xâu từ bộ nhớ ảo của chương trình người dùng
-  s = User2System(virtAddr);
+
+  char *s = readChars(4);
+  if (!s)
+  {
+    printf("\n Empty string");
+    recoverPC();
+    return;
+  }
+
   // In xâu ra màn hình
   printf("\n Printed string: %s \n", s);
+
+  delete s;
 
   /* Modify return point */
   recoverPC();
@@ -21,7 +28,10 @@ void SyscallCreateFile()
 
   char *filename = readChars(4);
   if (!filename)
+  {
+    recoverPC();
     return;
+  }
   // DEBUG('a',"\n File name : '"<<filename<<"'");
 
   //  Create file with size = 0
@@ -56,7 +66,10 @@ void SyscallOpenFile()
 
   char *filename = readChars(4);
   if (!filename)
+  {
+    recoverPC();
     return;
+  }
 
   int type = readInt(5);
 
@@ -111,40 +124,29 @@ void SyscallCloseFile()
 void SyscallReadFile()
 {
   int fid;
-  char *buffer;
-  int charcount;
+
   DEBUG('a', "\n SC_Read call ...");
 
-  DEBUG('a', "\n Reading virtual address of buffer");
-  // Lấy tham số char* buffer từ thanh ghi r4
   int virtAddr = (kernel->machine->ReadRegister(4));
 
-  DEBUG('a', "\n Reading character count");
-  // Lấy tham số char count từ thanh ghi r5
-  charcount = kernel->machine->ReadRegister(5);
+  char *buffer = readChars(4);
+  int charcount = readInt(5);
+  int fid = readInt(6);
 
-  DEBUG('a', "\n Reading file descriptor");
-  // Lấy file descriptor từ thanh ghi r6
-  fid = kernel->machine->ReadRegister(6);
-
-  // Kiểm tra buffer có đủ bộ nhớ để lưu trữ dữ liệu đọc từ file hay không
-  buffer = User2System(virtAddr, charcount);
   if (buffer == NULL)
   {
-    printf("\n Not enough memory in system");
-    DEBUG('a', "\n Not enough memory in system");
-    kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
-    // trình người dùng
-    delete buffer;
+    DEBUG('a', "\n Invalid buffer");
     recoverPC();
     return;
   }
+
+  // TODO: Check console output
 
   // Nếu file descriptor == ConsoleInput thì đọc từ bàn phím
   if (fid == _ConsoleInput)
     charcount = SysReadConsole(buffer, charcount);
   // Nếu file descriptor > 1 và filedescriptor < 20 thì đọc từ file
-  else if (fid > 1 && fid < 20)
+  else
   {
     // Lấy openfile từ file descriptor
     OpenFile *file = kernel->fileSystem->Find(fid);
@@ -159,15 +161,6 @@ void SyscallReadFile()
 
     // Đọc ra charcount kí tự từ file
     charcount = file->Read(buffer, charcount);
-  }
-  // file descriptor không hợp lệ
-  else
-  {
-    printf("\n Invalid file descriptor.");
-    kernel->machine->WriteRegister(2, -1);
-    delete buffer;
-    recoverPC();
-    return;
   }
 
   printf("\n Success reading.");
@@ -185,32 +178,22 @@ void SyscallReadFile()
 
 void SyscallWriteFile()
 {
-  int fid;
-  char *buffer;
-  int charcount;
   DEBUG('a', "\n SC_Write call ...");
 
-  DEBUG('a', "\n Reading virtual address of buffer");
-  // Lấy tham số char* buffer từ thanh ghi r4
-  int virtAddr = (kernel->machine->ReadRegister(4));
+  char *buffer = readChars(4);
+  int charcount = readInt(5);
+  int fid = readInt(6);
 
-  DEBUG('a', "\n Reading character count");
-  // Lấy tham số char count từ thanh ghi r5
-  charcount = kernel->machine->ReadRegister(5);
-
-  DEBUG('a', "\n Reading file descriptor");
-  // Lấy file descriptor từ thanh ghi r6
-  fid = kernel->machine->ReadRegister(6);
-
-  buffer = User2System(virtAddr, charcount);
   // Thu gọn charcount
-  charcount = strlen(buffer);
+  charcount = min(charcount, strlen(buffer));
+
+  // TODO: Check console input
 
   // Nếu file descriptor == ConsoleInput thì viết từ bàn phím
   if (fid == _ConsoleOutput)
     charcount = SysWriteConsole(buffer, charcount);
   // Nếu file descriptor > 1 và filedescriptor < 20 thì viết ra file
-  else if (fid > 1 && fid < 20)
+  else
   {
     // Lấy openfile từ file descriptor
     OpenFile *file = kernel->fileSystem->Find(fid);
@@ -226,15 +209,6 @@ void SyscallWriteFile()
     // Viết ra charcount kí tự vào file
     charcount = file->Write(buffer, charcount);
   }
-  // file descriptor không hợp lệ
-  else
-  {
-    printf("\n Invalid file descriptor.");
-    kernel->machine->WriteRegister(2, -1);
-    delete buffer;
-    recoverPC();
-    return;
-  }
 
   printf("\n Success writing.");
   // Trả về cho chương trình người dùng số lượng ký tự đã viết
@@ -248,54 +222,43 @@ void SyscallWriteFile()
 
 void SyscallSeekFile()
 {
-  int pos;
-  int fid;
   DEBUG('a', "\n SC_Seek call ...");
 
-  DEBUG('a', "\n Reading pos");
-  // Lấy tham số pos từ thanh ghi r4
-  pos = (kernel->machine->ReadRegister(4));
+  int pos = readInt(4);
+  int fid = readInt(5);
 
-  DEBUG('a', "\n Reading file descriptor");
-  // Lấy file descriptor từ thanh ghi r5
-  fid = kernel->machine->ReadRegister(5);
-
-  // Nếu file descriptor > 1 và filedescriptor < 20 thì đọc từ file
-  if (fid > 1 && fid < 20)
+  if (fid == _ConsoleInput || fid == _ConsoleOutput)
   {
-    // Lấy openfile từ file descriptor
-    OpenFile *file = kernel->fileSystem->Find(fid);
-    if (file == NULL)
-    {
-      printf("\n Invalid file descriptor");
-      kernel->machine->WriteRegister(2, -1);
-      recoverPC();
-      return;
-    }
-
-    // Nếu pos = -1 thì đặt con trỏ file tại vị trí cuối file
-    if (pos == -1 || pos > file->Length())
-      pos = file->Length();
-    // Nếu pos không hợp lệ thì trả về lỗi
-    else if (pos < 0)
-    {
-      printf("\n Invalid position.");
-      kernel->machine->WriteRegister(2, -1);
-      recoverPC();
-      return;
-    }
-
-    // Đặt con trỏ file tại vị trí pos
-    file->Seek(pos);
-  }
-  // file descriptor không hợp lệ
-  else
-  {
-    printf("\n Invalid file descriptor.");
+    printf("\n Invalid file descriptor");
     kernel->machine->WriteRegister(2, -1);
     recoverPC();
     return;
   }
+
+  // Lấy openfile từ file descriptor
+  OpenFile *file = kernel->fileSystem->Find(fid);
+  if (file == NULL)
+  {
+    printf("\n Invalid file descriptor");
+    kernel->machine->WriteRegister(2, -1);
+    recoverPC();
+    return;
+  }
+
+  // Nếu pos = -1 thì đặt con trỏ file tại vị trí cuối file
+  if (pos == -1 || pos > file->Length())
+    pos = file->Length();
+  // Nếu pos không hợp lệ thì trả về lỗi
+  else if (pos < 0)
+  {
+    printf("\n Invalid position.");
+    kernel->machine->WriteRegister(2, -1);
+    recoverPC();
+    return;
+  }
+
+  // Đặt con trỏ file tại vị trí pos
+  file->Seek(pos);
 
   printf("\n Success Seek.");
 
@@ -313,27 +276,31 @@ void SyscallRemoveFile()
   if (!filename)
   {
     kernel->machine->WriteRegister(2, -1);
+    recoverPC();
     return;
   }
 
   // check if is open
-  // OpenFile *openFile = kernel->fileSystem->Open(filename);
-  // if (openFile != nullptr)
-  // {
-  // 	delete openFile;
-  // 	printf("Error: File '%s' is currently open and cannot be removed.\n", filename);
-  // 	kernel->machine->WriteRegister(2, -1);
-  // 	return;
-  // }
+  OpenFile *file = kernel->fileSystem->Find(filename);
+  if (file != nullptr)
+  {
+    printf("Error: File '%s' is currently open and cannot be removed.\n", filename);
+    kernel->machine->WriteRegister(2, -1);
+    delete filename;
+    recoverPC();
+    return;
+  }
 
   if (!kernel->fileSystem->Remove(filename))
   {
     printf("Error: Could not remove file '%s'\n", filename);
     kernel->machine->WriteRegister(2, -1);
+    delete filename;
+    recoverPC();
     return;
   }
 
-  delete[] filename;
+  delete filename;
 
   /* Modify return point */
   recoverPC();

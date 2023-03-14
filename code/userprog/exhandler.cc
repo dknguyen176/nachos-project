@@ -60,28 +60,25 @@ int readInt(int reg)
 char *readChars(int reg)
 {
   int virtAddr;
-  char *filename;
-  DEBUG('a', "\n Reading virtual address of filename");
+  char *str;
+  DEBUG('a', "\n Reading virtual address of string");
 
   // Lấy tham số tên tập tin từ thanh ghi reg
   virtAddr = kernel->machine->ReadRegister(reg);
-  DEBUG('a', "\n Reading filename.");
+  DEBUG('a', "\n Reading string.");
 
   // MaxFileLength là = 32
-  filename = User2System(virtAddr, MAXFILELENGTH);
-  return filename;
-  if (filename == NULL)
+  str = User2System(virtAddr, MAXFILELENGTH);
+  if (str == NULL)
   {
     printf("\n Not enough memory in system");
     DEBUG('a', "\n Not enough memory in system");
-    kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương trình người dùng
-  }
-  else
-  {
-    DEBUG('a', "\n Finish reading filename.");
+    kernel->machine->WriteRegister(2, (int)-1); // trả về lỗi cho chương trình người dùng
+    return NULL;
   }
 
-  return filename;
+  DEBUG('a', "\n Finish reading string.");
+  return str;
 }
 
 void recoverPC()
