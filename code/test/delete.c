@@ -8,7 +8,7 @@ int main()
     int len;
     char filename[maxlen + 1];
     /*Create a file*/
-    if (Remove("text.txt") == -1)
+    if (Remove("amogus.txt") == -1)
     {
         // xuất thông báo lỗi xóa tập tin
     }
