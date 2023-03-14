@@ -21,10 +21,7 @@
 // All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
 
-#include "copyright.h"
-#include "main.h"
-#include "syscall.h"
-#include "ksyscall.h"
+#include "exhandler.h"
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -47,52 +44,6 @@
 //	"which" is the kind of exception.  The list of possible exceptions
 //	is in machine.h.
 //----------------------------------------------------------------------
-
-int readInt(int reg)
-{
-	DEBUG('a', "\n Reading integer number");
-
-	int num = kernel->machine->ReadRegister(reg);
-
-	return num;
-}
-char *readChars(int reg)
-{
-	int virtAddr;
-	char *filename;
-	DEBUG('a', "\n Reading virtual address of filename");
-
-	// Lấy tham số tên tập tin từ thanh ghi reg
-	virtAddr = kernel->machine->ReadRegister(reg);
-	DEBUG('a', "\n Reading filename.");
-
-	// MaxFileLength là = 32
-	filename = User2System(virtAddr, MAXFILELENGTH);
-	return filename;
-	if (filename == NULL)
-	{
-		printf("\n Not enough memory in system");
-		DEBUG('a', "\n Not enough memory in system");
-		kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương trình người dùng
-	}
-	else
-	{
-		DEBUG('a', "\n Finish reading filename.");
-	}
-
-	return filename;
-}
-void recoverPC()
-{
-	/* set previous programm counter (debugging only)*/
-	kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-	/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-	kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-	/* set next programm counter for brach execution */
-	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-}
 
 void ExceptionHandler(ExceptionType which)
 {
@@ -139,509 +90,62 @@ void ExceptionHandler(ExceptionType which)
 		}
 
 		case SC_Create:
-		{
-			DEBUG('a', "\n SC_Create call ...");
-
-			char *filename = readChars(4);
-			if (!filename)
-				return;
-			// DEBUG('a',"\n File name : '"<<filename<<"'");
-
-			//  Create file with size = 0
-			//  Dùng đối tượng fileSystem của lớp OpenFile để tạo file,
-			//  việc tạo file này là sử dụng các thủ tục tạo file của hệ điều
-			//  hành Linux, chúng ta không quản ly trực tiếp các block trên
-			//  đĩa cứng cấp phát cho file, việc quản ly các block của file
-			//  trên ổ đĩa là một đồ án khác
-			if (!kernel->fileSystem->Create(filename))
-			{
-				printf("\n Error create file '%s'", filename);
-				kernel->machine->WriteRegister(2, -1);
-				delete filename;
-
-				/* Modify return point */
-				recoverPC();
-
-				return;
-			}
-			printf("\n Successful create file '%s'", filename);
-			kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
-			// người dùng thành công
-			delete filename;
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallCreateFile();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_Open:
-		{
-			DEBUG('a', "\n SC_Open call ...");
-
-			char *filename = readChars(4);
-			if (!filename)
-				return;
-
-			int type = readInt(5);
-
-			OpenFile *file = kernel->fileSystem->Open(filename, type);
-			if (!file)
-			{
-				printf("\n Error open file '%s'", filename);
-				kernel->machine->WriteRegister(2, (int)-1);
-				delete filename;
-
-				/* Modify return point */
-				recoverPC();
-
-				return;
-			}
-			printf("\n Open file '%s' succesfully, file descriptor %d\n", filename, file->FileDescriptor());
-
-			kernel->machine->WriteRegister(2, (int)file->FileDescriptor()); // trả về cho chương trình
-			// người dùng thành công
-			delete filename;
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallOpenFile();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_Close:
-		{
-			DEBUG('a', "\n SC_Close call ...");
-
-			int file = readInt(4);
-
-			int result = kernel->fileSystem->_Close(file);
-			if (result == -1)
-			{
-				printf("\n Error close file with id '%d'", file);
-				kernel->machine->WriteRegister(2, (int)-1);
-
-				/* Modify return point */
-				recoverPC();
-
-				return;
-			}
-			printf("\n Close file succesfully, file descriptor %d\n", file);
-
-			kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
-			// người dùng thành công
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallCloseFile();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_Read:
-		{
-			int fid;
-			char *buffer;
-			int charcount;
-			DEBUG('a', "\n SC_Read call ...");
-
-			DEBUG('a', "\n Reading virtual address of buffer");
-			// Lấy tham số char* buffer từ thanh ghi r4
-			int virtAddr = (kernel->machine->ReadRegister(4));
-
-			DEBUG('a', "\n Reading character count");
-			// Lấy tham số char count từ thanh ghi r5
-			charcount = kernel->machine->ReadRegister(5);
-
-			DEBUG('a', "\n Reading file descriptor");
-			// Lấy file descriptor từ thanh ghi r6
-			fid = kernel->machine->ReadRegister(6);
-
-			// Kiểm tra buffer có đủ bộ nhớ để lưu trữ dữ liệu đọc từ file hay không
-			buffer = User2System(virtAddr, charcount);
-			if (buffer == NULL)
-			{
-				printf("\n Not enough memory in system");
-				DEBUG('a', "\n Not enough memory in system");
-				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
-				// trình người dùng
-				delete buffer;
-				recoverPC();
-				return;
-			}
-
-			// Nếu file descriptor == ConsoleInput thì đọc từ bàn phím
-			if (fid == _ConsoleInput)
-				charcount = SysReadConsole(buffer, charcount);
-			// Nếu file descriptor > 1 và filedescriptor < 20 thì đọc từ file
-			else if (fid > 1 && fid < 20)
-			{
-				// Lấy openfile từ file descriptor
-				OpenFile *file = kernel->fileSystem->Find(fid);
-				if (file == NULL)
-				{
-					printf("\n Invalid file descriptor");
-					kernel->machine->WriteRegister(2, -1);
-					delete buffer;
-					recoverPC();
-					return;
-				}
-
-				// Đọc ra charcount kí tự từ file
-				charcount = file->Read(buffer, charcount);
-			}
-			// file descriptor không hợp lệ
-			else
-			{
-				printf("\n Invalid file descriptor.");
-				kernel->machine->WriteRegister(2, -1);
-				delete buffer;
-				recoverPC();
-				return;
-			}
-
-			printf("\n Success reading.");
-			// Trả về cho chương trình người dùng số lượng ký tự đã đọc
-			kernel->machine->WriteRegister(2, charcount);
-
-			// Trả về cho chương trình người dùng buffer
-			System2User(virtAddr, charcount, buffer);
-
-			delete buffer;
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallReadFile();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_Write:
-		{
-			int fid;
-			char *buffer;
-			int charcount;
-			DEBUG('a', "\n SC_Write call ...");
-
-			DEBUG('a', "\n Reading virtual address of buffer");
-			// Lấy tham số char* buffer từ thanh ghi r4
-			int virtAddr = (kernel->machine->ReadRegister(4));
-
-			DEBUG('a', "\n Reading character count");
-			// Lấy tham số char count từ thanh ghi r5
-			charcount = kernel->machine->ReadRegister(5);
-
-			DEBUG('a', "\n Reading file descriptor");
-			// Lấy file descriptor từ thanh ghi r6
-			fid = kernel->machine->ReadRegister(6);
-
-			buffer = User2System(virtAddr, charcount);
-			// Thu gọn charcount
-			charcount = strlen(buffer);
-
-			// Nếu file descriptor == ConsoleInput thì viết từ bàn phím
-			if (fid == _ConsoleOutput)
-				charcount = SysWriteConsole(buffer, charcount);
-			// Nếu file descriptor > 1 và filedescriptor < 20 thì viết ra file
-			else if (fid > 1 && fid < 20)
-			{
-				// Lấy openfile từ file descriptor
-				OpenFile *file = kernel->fileSystem->Find(fid);
-				if (file == NULL)
-				{
-					printf("\n Invalid file descriptor");
-					kernel->machine->WriteRegister(2, -1);
-					delete buffer;
-					recoverPC();
-					return;
-				}
-
-				// Viết ra charcount kí tự vào file
-				charcount = file->Write(buffer, charcount);
-			}
-			// file descriptor không hợp lệ
-			else
-			{
-				printf("\n Invalid file descriptor.");
-				kernel->machine->WriteRegister(2, -1);
-				delete buffer;
-				recoverPC();
-				return;
-			}
-
-			printf("\n Success writing.");
-			// Trả về cho chương trình người dùng số lượng ký tự đã viết
-			kernel->machine->WriteRegister(2, charcount);
-
-			delete buffer;
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallWriteFile();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_Seek:
-		{
-			int pos;
-			int fid;
-			DEBUG('a', "\n SC_Seek call ...");
-
-			DEBUG('a', "\n Reading pos");
-			// Lấy tham số pos từ thanh ghi r4
-			pos = (kernel->machine->ReadRegister(4));
-
-			DEBUG('a', "\n Reading file descriptor");
-			// Lấy file descriptor từ thanh ghi r5
-			fid = kernel->machine->ReadRegister(5);
-
-			// Nếu file descriptor > 1 và filedescriptor < 20 thì đọc từ file
-			if (fid > 1 && fid < 20)
-			{
-				// Lấy openfile từ file descriptor
-				OpenFile *file = kernel->fileSystem->Find(fid);
-				if (file == NULL)
-				{
-					printf("\n Invalid file descriptor");
-					kernel->machine->WriteRegister(2, -1);
-					recoverPC();
-					return;
-				}
-
-				// Nếu pos = -1 thì đặt con trỏ file tại vị trí cuối file
-				if (pos == -1 || pos > file->Length())
-					pos = file->Length();
-				// Nếu pos không hợp lệ thì trả về lỗi
-				else if (pos < 0)
-				{
-					printf("\n Invalid position.");
-					kernel->machine->WriteRegister(2, -1);
-					recoverPC();
-					return;
-				}
-
-				// Đặt con trỏ file tại vị trí pos
-				file->Seek(pos);
-			}
-			// file descriptor không hợp lệ
-			else
-			{
-				printf("\n Invalid file descriptor.");
-				kernel->machine->WriteRegister(2, -1);
-				recoverPC();
-				return;
-			}
-
-			printf("\n Success Seek.");
-
-			// Trả về vị trí của con trỏ sau khi được dịch chuyển
-			kernel->machine->WriteRegister(2, pos);
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallSeekFile();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_PrintString:
-		{
-			char *s;
-			DEBUG('a', "\n SC_PrintString call ...");
-			// Lấy tham số xâu từ thanh ghi r4
-			int virtAddr = (kernel->machine->ReadRegister(4));
-			// Lấy xâu từ bộ nhớ ảo của chương trình người dùng
-			s = User2System(virtAddr);
-			// In xâu ra màn hình
-			printf("\n Printed string: %s \n", s);
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallPrintString();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_Remove:
-		{
-			char *filename = readChars(4);
-
-			if (!filename)
-			{
-				kernel->machine->WriteRegister(2, -1);
-				return;
-			}
-
-			// check if is open
-			// OpenFile *openFile = kernel->fileSystem->Open(filename);
-			// if (openFile != nullptr)
-			// {
-			// 	delete openFile;
-			// 	printf("Error: File '%s' is currently open and cannot be removed.\n", filename);
-			// 	kernel->machine->WriteRegister(2, -1);
-			// 	return;
-			// }
-
-			if (!kernel->fileSystem->Remove(filename))
-			{
-				printf("Error: Could not remove file '%s'\n", filename);
-				kernel->machine->WriteRegister(2, -1);
-				return;
-			}
-
-			delete[] filename;
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallRemoveFile();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_OpenSocket:
-		{
-			DEBUG('a', "\n SC_OpenSocket call ...");
-
-			OpenFile *file = kernel->fileSystem->_OpenSocket();
-			if (!file)
-			{
-				printf("\n Error open socket");
-				kernel->machine->WriteRegister(2, (int)-1);
-
-				/* Modify return point */
-				recoverPC();
-
-				return;
-			}
-			printf("\n Open socket succesfully, file descriptor %d\n", file->FileDescriptor());
-
-			kernel->machine->WriteRegister(2, (int)file->FileDescriptor()); // trả về cho chương trình
-			// người dùng thành công
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallOpenSocket();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_Connect:
-		{
-			DEBUG('a', "\n SC_Connect call ...");
-
-			int sockID = readInt(4);
-			char *ip = readChars(5);
-			int port = readInt(6);
-
-			OpenFile *socket = kernel->fileSystem->Find(sockID);
-			if (!socket)
-				cerr << "Socket is not open\n";
-			else
-				cerr << "Socket open, fd " << socket->FileDescriptor() << '\n';
-
-			int result = kernel->fileSystem->_Connect(sockID, ip, port);
-			if (result == -1)
-			{
-				printf("\n Error connect socket");
-				kernel->machine->WriteRegister(2, (int)-1);
-				delete ip;
-
-				/* Modify return point */
-				recoverPC();
-
-				return;
-			}
-
-			printf("\n Connect socket succesfully, file descriptor %d\n", sockID);
-
-			kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
-			// người dùng thành công
-			delete ip;
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallConnectSocket();
 			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		}
 
 		case SC_CloseSocket:
-		{
-			DEBUG('a', "\n SC_CloseSocket call ...");
-
-			int sockID = readInt(4);
-
-			int result = kernel->fileSystem->_Close(sockID);
-			if (result == -1)
-			{
-				printf("\n Error close socket with id '%d'", sockID);
-				kernel->machine->WriteRegister(2, (int)-1);
-
-				/* Modify return point */
-				recoverPC();
-
-				return;
-			}
-			printf("\n Close socket succesfully, file descriptor %d\n", sockID);
-
-			kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
-			// người dùng thành công
-
-			/* Modify return point */
-			recoverPC();
-
+			SyscallCloseSocket();
 			return;
 
-			ASSERTNOTREACHED();
-
-			break;
-		}
-
 		default:
-		{
 			cerr << "Unexpected system call " << type << "\n";
-			break;
-		}
+			recoverPC();
+			return;
 		}
 
-		break;
+		return;
 
 	default:
 		cerr << "Unexpected user mode exception" << (int)which << "\n";
-		break;
+		recoverPC();
+		return;
 	}
+
 	ASSERTNOTREACHED();
 }

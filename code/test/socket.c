@@ -11,11 +11,15 @@
 
 int main()
 {
-  int fd = Open("text.txt", 0);
+  int fd, sockID, result;
 
-  int sockID = OpenSocket();
+  fd = Open("text.txt", 0);
 
-  int result = Connect(sockID, "127.0.0.1", PORT);
+  result = Close(fd);
+
+  sockID = OpenSocket();
+
+  result = Connect(sockID, "127.0.0.1", PORT);
 
   result = CloseSocket(sockID);
 

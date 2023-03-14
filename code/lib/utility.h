@@ -16,7 +16,6 @@
 #define TRUE true
 #define FALSE false
 // #define bool int		// necessary on the Mac?
-#define MAXFILELENGTH 32
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -35,8 +34,5 @@
 
 typedef void (*VoidFunctionPtr)(void *arg);
 typedef void (*VoidNoArgFunctionPtr)();
-
-char *User2System(int virtAddr, int limit = -1);
-int System2User(int virtAddr, int len, char *buffer);
 
 #endif // UTILITY_H

@@ -234,10 +234,9 @@ LIB_C = ../lib/bitmap.cc\
 	../lib/hash.cc\
 	../lib/libtest.cc\
 	../lib/list.cc\
-	../lib/sysdep.cc\
-	../lib/utility.cc
+	../lib/sysdep.cc
 
-LIB_O = bitmap.o debug.o libtest.o sysdep.o utility.o
+LIB_O = bitmap.o debug.o libtest.o sysdep.o
 
 
 MACHINE_H = ../machine/callback.h\
@@ -285,14 +284,20 @@ THREAD_O = alarm.o kernel.o main.o scheduler.o synch.o thread.o
 
 USERPROG_H = ../userprog/addrspace.h\
 	../userprog/syscall.h\
+	../userprog/ksyscall.h\
 	../userprog/synchconsole.h\
-	../userprog/noff.h
+	../userprog/noff.h\
+	../userprog/exhandler.h
 
 USERPROG_C = ../userprog/addrspace.cc\
 	../userprog/exception.cc\
-	../userprog/synchconsole.cc
+	../userprog/synchconsole.cc\
+	../userprog/ksyscall.cc\
+	../userprog/exhandler.cc\
+	../userprog/file.cc\
+	../userprog/socket.cc
 
-USERPROG_O = addrspace.o exception.o synchconsole.o
+USERPROG_O = addrspace.o ksyscall.o exception.o synchconsole.o exhandler.o file.o socket.o
 
 FILESYS_H =../filesys/directory.h \
 	../filesys/filehdr.h\
