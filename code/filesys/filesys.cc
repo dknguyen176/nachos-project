@@ -42,9 +42,16 @@
 // Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
-#ifdef FILESYS_STUB
 
+#include "copyright.h"
+#include "debug.h"
+#include "disk.h"
+#include "pbitmap.h"
+#include "directory.h"
+#include "filehdr.h"
 #include "filesys.h"
+
+#ifdef FILESYS_STUB
 
 FileSystem::FileSystem()
 {
@@ -148,15 +155,7 @@ int FileSystem::_Receive(int sockID, char *buffer, int size)
     return result;
 }
 
-#else
-
-#include "copyright.h"
-#include "debug.h"
-#include "disk.h"
-#include "pbitmap.h"
-#include "directory.h"
-#include "filehdr.h"
-#include "filesys.h"
+#else // FILESYS_STUB
 
 // Sectors containing the file headers for the bitmap of free sectors,
 // and the directory of files.  These file headers are placed in well-known
@@ -447,4 +446,4 @@ void FileSystem::Print()
     delete directory;
 }
 
-#endif
+#endif // FILESYS_STUB
