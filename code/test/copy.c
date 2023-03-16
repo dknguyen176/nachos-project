@@ -1,14 +1,29 @@
 #include "syscall.h"
 // #include "copyright.h"
 
-int main()
+int main(int argc, char *argv[])
 {
     OpenFileId fdsrc, fddst;
-    char *filenameSrc = "text1.txt";
-    char *filenameDst = "text2.txt";
+    char *filenameSrc;
+    char *filenameDst;
     char c;
     char buffer[101];
-    // int size, i;
+    int size, i;
+
+    if (argc < 3)
+    {
+        PrintString("Usage: copy <source> <destination>");
+        Halt();
+    }
+
+    filenameSrc = argv[1];
+    filenameDst = argv[2];
+
+    // char filenameSrc[101], filenameDst[101];
+    // PrintString("Input source file name: ");
+    // Read(filenameSrc, 101, 0);
+    // PrintString("Input destination file name: ");
+    // Read(filenameDst, 101, 0);
 
     fdsrc = Open(filenameSrc, 0);
 
