@@ -26,12 +26,6 @@ void SyscallPrintString()
   DEBUG('a', "\n SC_PrintString call ...");
 
   char *s = readChars(4);
-  if (!s)
-  {
-    SysWriteConsole("\n Empty string", strlen("\n Empty string"));
-    recoverPC();
-    return;
-  }
 
   // In xâu ra màn hình
   SysWriteConsole(s, strlen(s));
@@ -268,7 +262,7 @@ void SyscallSeekFile()
 
   // Lấy openfile từ file descriptor
   OpenFile *file = kernel->fileSystem->Find(fid);
-  if (file == NULL)
+  if (file == NULL || file->isSocket()) // Nếu file descriptor không hợp lệ hoặc là socket thì trả về lỗi
   {
     printf("\n Invalid file descriptor");
     kernel->machine->WriteRegister(2, -1);

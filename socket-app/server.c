@@ -61,7 +61,7 @@ int main(int argc, char const *argv[])
     // Thử lại 10 lần để gửi tin nhắn cho client
     for (int retryCount = 0; retryCount < 10; retryCount++)
     {
-      int retVal = send(new_socket, "Hello from server", 17, 0);
+      int retVal = write(new_socket, "Hello from server", 17);
       if (retVal == 17)
         break;
       sleep(1);

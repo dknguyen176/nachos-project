@@ -23,6 +23,7 @@
 #include "copyright.h"
 #include "utility.h"
 #include "sysdep.h"
+#include "sys/stat.h"
 
 #ifdef FILESYS_STUB // Temporarily implement calls to
 					// Nachos file system as calls to UNIX!
@@ -61,12 +62,21 @@ public:
 	}
 	int Read(char *into, int numBytes)
 	{
+		if (isSocket()) // socket thì không cần seek
+		{
+			return ReadPartial(file, into, numBytes);
+		}
 		int numRead = ReadAt(into, numBytes, currentOffset);
 		currentOffset += numRead;
 		return numRead;
 	}
 	int Write(char *from, int numBytes)
 	{
+		if (isSocket()) // socket thì không cần seek
+		{
+			WriteFile(file, from, numBytes);
+			return numBytes;
+		}
 		int numWritten = WriteAt(from, numBytes, currentOffset);
 		currentOffset += numWritten;
 		return numWritten;
@@ -81,6 +91,13 @@ public:
 	int FileDescriptor()
 	{
 		return file;
+	}
+
+	bool isSocket()
+	{
+		struct stat s;
+		fstat(file, &s);
+		return S_ISSOCK(s.st_mode);
 	}
 
 private:

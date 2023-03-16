@@ -22,8 +22,13 @@ int main()
 
   result = Connect(sockID, "127.0.0.1", PORT);
 
-  result = Send(sockID, "Hello from client", 17);
-  result = Receive(sockID, receiveMessage, 100);
+  // result = Send(sockID, "Hello from client", 17);
+  // result = Receive(sockID, receiveMessage, 100);
+
+  // Use Write and Read instead of Send and Receive
+  result = Write("Hello from client", 17, sockID);
+  result = Read(receiveMessage, 100, sockID);
+
   PrintString(receiveMessage);
 
   result = CloseSocket(sockID);
