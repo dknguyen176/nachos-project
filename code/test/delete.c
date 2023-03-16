@@ -3,18 +3,27 @@
 
 #define maxlen 32
 
-int main()
+int main(int argc, char *argv[])
 {
     int len;
-    char filename[maxlen + 1];
-    /*Create a file*/
-    if (Remove("amogus.txt") == -1)
+    char *filename;
+
+    filename = argv[1];
+
+    if (argc < 2)
+    {
+        PrintString("Usage: delete <filename>");
+        Halt();
+    }
+
+    if (Remove(filename) == -1)
     {
         // xuất thông báo lỗi xóa tập tin
     }
     else
     {
         // xuất thông báo xóa tập tin thành công
+        PrintString("Delete successfully");
     }
     Halt();
 }
