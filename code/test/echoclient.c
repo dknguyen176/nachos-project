@@ -23,6 +23,7 @@ int main()
     result = Read(receiveMessage, 100, sockID);
 
     PrintString(receiveMessage);
+    PrintString("\n");
 
     result = CloseSocket(sockID);
 

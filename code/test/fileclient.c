@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     if (argc < 3)
     {
-        PrintString("Usage: fileclient <filename>");
+        PrintString("Usage: fileclient <filename>\n");
         Halt();
     }
 
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
     if (fdsrc == -1 || fddst == -1)
     {
-        PrintString("can not open file");
+        PrintString("Can not open file\n");
         return 0;
     }
 
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
     Write(receiveMessage, 100, fddst);
 
-    PrintString("Fileclient successfuly\n");
+    PrintString("\nFileclient successfuly\n");
 
     result = CloseSocket(sockID);
 

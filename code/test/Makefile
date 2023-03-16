@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments createfile openfile closefile readsc writesc delete seek socket copy cat concatenate echoclient fileclient
+PROGRAMS = add halt shell matmult sort segments createfile copy cat delete concatenate echoclient fileclient
 
 endif
 
@@ -164,52 +164,6 @@ createfile: createfile.o start.o
 	$(LD) $(LDFLAGS) start.o createfile.o -o createfile.coff
 	$(COFF2NOFF) createfile.coff createfile
 
-openfile.o: openfile.c
-	$(CC) $(CFLAGS) -c openfile.c
-openfile: openfile.o start.o
-	$(LD) $(LDFLAGS) start.o openfile.o -o openfile.coff
-	$(COFF2NOFF) openfile.coff openfile
-	
-closefile.o: closefile.c
-	$(CC) $(CFLAGS) -c closefile.c
-closefile: closefile.o start.o
-	$(LD) $(LDFLAGS) start.o closefile.o -o closefile.coff
-	$(COFF2NOFF) closefile.coff closefile
-
-readsc.o: readsc.c
-	$(CC) $(CFLAGS) -c readsc.c
-readsc: readsc.o start.o
-	$(LD) $(LDFLAGS) start.o readsc.o -o readsc.coff
-	$(COFF2NOFF) readsc.coff readsc
-
-writesc.o: writesc.c
-	$(CC) $(CFLAGS) -c writesc.c
-writesc: writesc.o start.o
-	$(LD) $(LDFLAGS) start.o writesc.o -o writesc.coff
-	$(COFF2NOFF) writesc.coff writesc
-
-delete.o: delete.c 
-	$(CC) $(CFLAGS) -c delete.c 
-delete: delete.o start.o 
-	$(LD) $(LDFLAGS) start.o delete.o -o delete.coff 
-	$(COFF2NOFF) delete.coff delete
-
-seek.o: seek.c
-	$(CC) $(CFLAGS) -c seek.c
-seek: seek.o start.o
-	$(LD) $(LDFLAGS) start.o seek.o -o seek.coff
-	$(COFF2NOFF) seek.coff seek
-
-socket.o: socket.c
-	$(CC) $(CFLAGS) -c socket.c
-socket: socket.o start.o
-	$(LD) $(LDFLAGS) start.o socket.o -o socket.coff
-	$(COFF2NOFF) socket.coff socket
-
-clean:
-	$(RM) -f *.o *.ii
-	$(RM) -f *.coff
-
 copy.o: copy.c 
 	$(CC) $(CFLAGS) -c copy.c 
 copy: copy.o start.o 
@@ -221,6 +175,12 @@ cat.o: cat.c
 cat: cat.o start.o 
 	$(LD) $(LDFLAGS) start.o cat.o -o cat.coff 
 	$(COFF2NOFF) cat.coff cat
+
+delete.o: delete.c 
+	$(CC) $(CFLAGS) -c delete.c 
+delete: delete.o start.o 
+	$(LD) $(LDFLAGS) start.o delete.o -o delete.coff 
+	$(COFF2NOFF) delete.coff delete
 
 concatenate.o: concatenate.c 
 	$(CC) $(CFLAGS) -c concatenate.c 
@@ -239,6 +199,10 @@ fileclient.o: fileclient.c
 fileclient: fileclient.o start.o 
 	$(LD) $(LDFLAGS) start.o fileclient.o -o fileclient.coff 
 	$(COFF2NOFF) fileclient.coff fileclient
+
+clean:
+	$(RM) -f *.o *.ii
+	$(RM) -f *.coff
 
 distclean: clean
 	$(RM) -f $(PROGRAMS)

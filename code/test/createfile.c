@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 
   if (argc < 2)
   {
-    PrintString("Usage: createfile <filename>");
+    PrintString("Usage: createfile <filename>\n");
     Halt();
   }
 
@@ -25,11 +25,11 @@ int main(int argc, char *argv[])
   /*Create a file*/
   if (Create(filename) == -1)
   {
-    PrintString("Create file error");
+    PrintString("Create file error\n");
   }
   else
   {
-    PrintString("Create file successful");
+    PrintString("Create file successful\n");
   }
   Halt();
 }

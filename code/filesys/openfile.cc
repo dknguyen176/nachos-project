@@ -10,13 +10,103 @@
 // Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
-#ifndef FILESYS_STUB
 
 #include "copyright.h"
 #include "main.h"
 #include "filehdr.h"
 #include "openfile.h"
 #include "synchdisk.h"
+
+#ifdef FILESYS_STUB
+
+OpenFile::OpenFile(int f, char *name)
+{
+    file = f;
+    currentOffset = 0;
+
+    if (name != NULL)
+    {
+        filename = new char[strlen(name) + 1];
+        strcpy(filename, name);
+    }
+    else
+    {
+        filename = NULL;
+    }
+} // open the file
+
+OpenFile::~OpenFile()
+{
+    if (filename != NULL)
+        delete filename;
+    Close(file);
+} // close the file
+
+void OpenFile::Seek(int position)
+{
+    currentOffset = position;
+}
+
+int OpenFile::ReadAt(char *into, int numBytes, int position)
+{
+    Lseek(file, position, 0);
+    return ReadPartial(file, into, numBytes);
+}
+
+int OpenFile::WriteAt(char *from, int numBytes, int position)
+{
+    Lseek(file, position, 0);
+    WriteFile(file, from, numBytes);
+    return numBytes;
+}
+
+int OpenFile::Read(char *into, int numBytes)
+{
+    if (isSocket()) // socket thì không cần seek
+    {
+        return ReadPartial(file, into, numBytes);
+    }
+    int numRead = ReadAt(into, numBytes, currentOffset);
+    currentOffset += numRead;
+    return numRead;
+}
+
+int OpenFile::Write(char *from, int numBytes)
+{
+    if (isSocket()) // socket thì không cần seek
+    {
+        WriteFile(file, from, numBytes);
+        return numBytes;
+    }
+    int numWritten = WriteAt(from, numBytes, currentOffset);
+    currentOffset += numWritten;
+    return numWritten;
+}
+
+int OpenFile::Length()
+{
+    Lseek(file, 0, 2);
+    return Tell(file);
+}
+
+int OpenFile::FileDescriptor()
+{
+    return file;
+}
+
+bool OpenFile::isSocket()
+{
+    struct stat s;
+    fstat(file, &s);
+    return S_ISSOCK(s.st_mode);
+}
+
+char *OpenFile::Filename()
+{
+    return filename;
+}
+
+#else // FILESYS_STUB
 
 //----------------------------------------------------------------------
 // OpenFile::OpenFile

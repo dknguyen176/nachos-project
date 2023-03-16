@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     if (argc < 3)
     {
-        PrintString("Usage: copy <source> <destination>");
+        PrintString("Usage: copy <source> <destination>\n");
         Halt();
     }
 
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
     if (fdsrc == -1 || fddst == -1)
     {
-        PrintString("copy failed");
+        PrintString("copy failed\n");
         return 0;
     }
 
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     Close(fdsrc);
     Close(fddst);
 
-    PrintString("Copy successfully");
+    PrintString("Copy successfully\n");
 
     Halt();
 }

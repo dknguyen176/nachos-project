@@ -5,25 +5,27 @@
 
 int main(int argc, char *argv[])
 {
-    int len;
+    int len, fd;
     char *filename;
 
     filename = argv[1];
 
     if (argc < 2)
     {
-        PrintString("Usage: delete <filename>");
+        PrintString("Usage: delete <filename>\n");
         Halt();
     }
 
+    // fd = Open(filename, 0);
+
     if (Remove(filename) == -1)
     {
-        // xuất thông báo lỗi xóa tập tin
+        PrintString("Delete failed\n");
     }
     else
     {
         // xuất thông báo xóa tập tin thành công
-        PrintString("Delete successfully");
+        PrintString("Delete successfully\n");
     }
     Halt();
 }

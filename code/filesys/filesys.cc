@@ -92,7 +92,7 @@ OpenFile *FileSystem::Open(char *name, int type)
     for (int i = 0; i < TABLESIZE; i++)
         if (table[i] == NULL)
         {
-            table[i] = new OpenFile(fileDescriptor);
+            table[i] = new OpenFile(fileDescriptor, name);
             return table[i];
         }
 
@@ -116,6 +116,14 @@ OpenFile *FileSystem::Find(int id)
 {
     for (int i = 0; i < TABLESIZE; i++)
         if (table[i] != NULL && table[i]->FileDescriptor() == id)
+            return table[i];
+    return NULL;
+}
+
+OpenFile *FileSystem::Find(char *name)
+{
+    for (int i = 0; i < TABLESIZE; i++)
+        if (table[i] != NULL && table[i]->Filename() != NULL && strcmp(table[i]->Filename(), name) == 0)
             return table[i];
     return NULL;
 }

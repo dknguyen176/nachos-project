@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     if (argc < 3)
     {
-        PrintString("Usage: concatenate <file1> <file2>");
+        PrintString("Usage: concatenate <file1> <file2>\n");
         Halt();
     }
 
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
     if (fd1 == -1 || fd2 == -1)
     {
-        PrintString("concat failed");
+        PrintString("concat failed\n");
         return 0;
     }
 
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     Close(fd1);
     Close(fd2);
 
-    PrintString("Concat successfully");
+    PrintString("\nConcat successfully\n");
 
     Halt();
 }

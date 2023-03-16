@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        PrintString("Usage: cat <filename>");
+        PrintString("Usage: cat <filename>\n");
         Halt();
     }
 
@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     fd = Open(filename, 0);
     Read(buffer, 100, fd);
     PrintString(buffer);
+    PrintString("\n");
 
     Halt();
 }
