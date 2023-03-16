@@ -15,6 +15,7 @@ extern int readInt(int reg);
 extern char *readChars(int reg);
 extern void recoverPC();
 
+extern void SyscallReadString();
 extern void SyscallPrintString();
 extern void SyscallPrintInt();
 

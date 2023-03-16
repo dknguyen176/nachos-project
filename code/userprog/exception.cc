@@ -113,6 +113,10 @@ void ExceptionHandler(ExceptionType which)
 			SyscallSeekFile();
 			return;
 
+		case SC_ReadString:
+			SyscallReadString();
+			return;
+
 		case SC_PrintString:
 			SyscallPrintString();
 			return;

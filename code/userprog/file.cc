@@ -1,6 +1,26 @@
 #include "exhandler.h"
 #include <stdlib.h>
 
+void SyscallReadString()
+{
+  DEBUG('a', "\n SC_ReadString call ...");
+
+  int virtAddr = readInt(4);
+  char *s = readChars(4);
+  int len = readInt(5);
+
+  // Nhập xâu từ console
+  SysReadConsole(s, len);
+
+  // Copy xâu vào vùng nhớ của user
+  System2User(virtAddr, strlen(s), s);
+
+  delete s;
+
+  /* Modify return point */
+  recoverPC();
+}
+
 void SyscallPrintString()
 {
   DEBUG('a', "\n SC_PrintString call ...");
@@ -8,13 +28,13 @@ void SyscallPrintString()
   char *s = readChars(4);
   if (!s)
   {
-    printf("\n Empty string");
+    SysWriteConsole("\n Empty string", strlen("\n Empty string"));
     recoverPC();
     return;
   }
 
   // In xâu ra màn hình
-  printf("\n Printed string: %s \n", s);
+  SysWriteConsole(s, strlen(s));
 
   delete s;
 
