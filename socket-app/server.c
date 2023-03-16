@@ -9,6 +9,19 @@
 
 #define PORT 8080
 
+void toUpper(char *str)
+{
+  int i = 0;
+  while (str[i] != '\0')
+  {
+    if (str[i] >= 'a' && str[i] <= 'z')
+    {
+      str[i] -= 32;
+    }
+    i++;
+  }
+}
+
 int main(int argc, char const *argv[])
 {
   int server_fd, new_socket, valread;
@@ -59,6 +72,7 @@ int main(int argc, char const *argv[])
       exit(EXIT_FAILURE);
     }
     // Thử lại 10 lần để gửi tin nhắn cho client
+
     for (int retryCount = 0; retryCount < 10; retryCount++)
     {
       int retVal = write(new_socket, "Hello from server", 17);
