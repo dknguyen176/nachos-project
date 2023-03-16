@@ -19,12 +19,6 @@ int main(int argc, char *argv[])
     filenameSrc = argv[1];
     filenameDst = argv[2];
 
-    // char filenameSrc[101], filenameDst[101];
-    // PrintString("Input source file name: ");
-    // Read(filenameSrc, 101, 0);
-    // PrintString("Input destination file name: ");
-    // Read(filenameDst, 101, 0);
-
     fdsrc = Open(filenameSrc, 0);
 
     if (Create(filenameDst) == -1)
@@ -44,15 +38,8 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    // size = Seek(-1, fdsrc);
     Seek(0, fdsrc);
     Seek(0, fddst);
-
-    // for (i = 0; i < size; i++)
-    // {
-    //     Read(&c, 1, fdsrc);
-    //     Write(&c, 1, fddst);
-    // }
 
     Read(buffer, 100, fdsrc);
     Write(buffer, 100, fddst);

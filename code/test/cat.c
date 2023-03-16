@@ -14,8 +14,6 @@ int main(int argc, char *argv[])
     filename = argv[1];
 
     fd = Open(filename, 0);
-
-    // char buffer[101];
     Read(buffer, 100, fd);
     PrintString(buffer);
 
