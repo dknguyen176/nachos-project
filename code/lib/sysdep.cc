@@ -296,7 +296,7 @@ bool PollFile(int fd)
 
 int OpenForRead(char *name)
 {
-    int fd = open(name, O_RDONLY);
+    int fd = open(name, O_RDONLY, 0666);
 
     ASSERT(fd >= 0);
     return fd;

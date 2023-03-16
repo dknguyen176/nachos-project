@@ -197,6 +197,103 @@ void AddrSpace::Execute()
 }
 
 //----------------------------------------------------------------------
+// AddrSpace::ExecuteV
+// 	Run a user program using the current thread
+//
+//      The program is assumed to have already been loaded into
+//      the address space
+//
+//----------------------------------------------------------------------
+
+void AddrSpace::ExecuteV(int argc, char **argv)
+{
+
+    kernel->currentThread->space = this;
+
+    this->InitRegisters(); // set the initial register values
+    this->RestoreState();  // load page table register
+
+    this->PassArgs(argc, argv);
+
+    kernel->machine->Run(); // jump to the user progam
+
+    ASSERTNOTREACHED(); // machine->Run never returns;
+                        // the address space exits
+                        // by doing the syscall "exit"
+}
+
+//----------------------------------------------------------------------
+// AddrSpace::PassArg
+// 	Pass arguments to the user program
+//
+//      The program is assumed to have already been loaded into
+//      the address space
+//
+//----------------------------------------------------------------------
+
+void AddrSpace::PassArgs(int argc, char **argv)
+{
+    Machine *machine = kernel->machine;
+
+    machine->WriteRegister(4, argc);
+
+    // Print the arguments
+    for (int i = 0; i < argc; i++)
+    {
+        // printf("argv[%d]: %s\n", i, argv[i]);
+        DEBUG(dbgAddr, "argv[" << i << "]: " << argv[i]);
+    }
+
+    // Allocate space for the arguments
+    int argSize = 0;
+    for (int i = 0; i < argc; i++)
+    {
+        argSize += strlen(argv[i]) + 1;
+    }
+
+    int argAddr = numPages * PageSize - argSize;
+    int argAddrStart = argAddr;
+
+    // Copy the arguments to the user space
+    for (int i = 0; i < argc; i++)
+    {
+        int argLen = strlen(argv[i]) + 1;
+        for (int j = 0; j < argLen; j++)
+        {
+            machine->WriteMem(argAddr, 1, argv[i][j]);
+            argAddr++;
+        }
+    }
+
+    // Allocate space for the pointers to the arguments including the null pointer
+    int argPtrAddr = argAddrStart - (argc + 1) * 4;
+    while (argPtrAddr % 4 != 0)
+    {
+        argPtrAddr--;
+    }
+    int argPtrAddrStart = argPtrAddr;
+
+    // Copy the pointers to the arguments to the user space
+    for (int i = 0; i < argc; i++)
+    {
+        machine->WriteMem(argPtrAddr, 4, argAddrStart);
+        argPtrAddr += 4;
+        argAddrStart += strlen(argv[i]) + 1;
+    }
+    machine->WriteMem(argPtrAddr, 4, 0);
+
+    machine->WriteRegister(5, argPtrAddrStart);
+
+    // Set the stack pointer
+    int stackreg = argPtrAddrStart - 4;
+    while (stackreg % 8 != 0)
+    {
+        stackreg--;
+    }
+    machine->WriteRegister(StackReg, stackreg);
+}
+
+//----------------------------------------------------------------------
 // AddrSpace::InitRegisters
 // 	Set the initial values for the user-level register set.
 //

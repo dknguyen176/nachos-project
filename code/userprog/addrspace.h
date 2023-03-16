@@ -32,6 +32,12 @@ public:
                   // assumes the program has already
                   // been loaded
 
+  void ExecuteV(int argc, char **argv); // Run a program with arguments
+                                        // assumes the program has already
+                                        // been loaded
+
+  void PassArgs(int argc, char **argv); // Pass arguments to the program
+
   void SaveState();    // Save/restore address space-specific
   void RestoreState(); // info on a context switch
 

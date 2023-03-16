@@ -5,11 +5,25 @@
 
 int main(int argc, char *argv[])
 {
+  // Print argv
 
-  PrintInt(argc);
+  char *filename;
+
+  if (argc < 2)
+  {
+    PrintString("Usage: createfile <filename>");
+    Halt();
+  }
+
+  filename = argv[1];
+  // if (strlen(filename) > maxlen)
+  // {
+  //   PrintString("File name too long");
+  //   Halt();
+  // }
 
   /*Create a file*/
-  if (Create("text.txt") == -1)
+  if (Create(filename) == -1)
   {
     PrintString("Create file error");
   }
