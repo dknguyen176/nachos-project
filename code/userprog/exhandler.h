@@ -5,6 +5,7 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
+#include "debug.h"
 
 #define MAXFILELENGTH 32
 

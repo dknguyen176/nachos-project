@@ -50,7 +50,7 @@ int System2User(int virtAddr, int len, char *buffer)
 
 int readInt(int reg)
 {
-  DEBUG('a', "\n Reading integer number");
+  DEBUG(dbgSys, "\n Reading integer number");
 
   int num = kernel->machine->ReadRegister(reg);
 
@@ -61,23 +61,22 @@ char *readChars(int reg)
 {
   int virtAddr;
   char *str;
-  DEBUG('a', "\n Reading virtual address of string");
+  DEBUG(dbgSys, "\n Reading virtual address of string");
 
   // Lấy tham số tên tập tin từ thanh ghi reg
   virtAddr = kernel->machine->ReadRegister(reg);
-  DEBUG('a', "\n Reading string.");
+  DEBUG(dbgSys, "\n Reading string.");
 
   // MaxFileLength là = 32
   str = User2System(virtAddr, MAXFILELENGTH);
   if (str == NULL)
   {
-    printf("\n Not enough memory in system");
-    DEBUG('a', "\n Not enough memory in system");
+    DEBUG(dbgSys, "\n Not enough memory in system");
     kernel->machine->WriteRegister(2, (int)-1); // trả về lỗi cho chương trình người dùng
     return NULL;
   }
 
-  DEBUG('a', "\n Finish reading string.");
+  DEBUG(dbgSys, "\n Finish reading string.");
   return str;
 }
 

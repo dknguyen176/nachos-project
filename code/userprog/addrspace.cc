@@ -240,7 +240,6 @@ void AddrSpace::PassArgs(int argc, char **argv)
     // Print the arguments
     for (int i = 0; i < argc; i++)
     {
-        // printf("argv[%d]: %s\n", i, argv[i]);
         DEBUG(dbgAddr, "argv[" << i << "]: " << argv[i]);
     }
 

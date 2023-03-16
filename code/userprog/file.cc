@@ -3,7 +3,7 @@
 
 void SyscallReadString()
 {
-  DEBUG('a', "\n SC_ReadString call ...");
+  DEBUG(dbgSys, "\n SC_ReadString call ...");
 
   kernel->machine->WriteRegister(6, _ConsoleInput);
 
@@ -12,7 +12,7 @@ void SyscallReadString()
 
 void SyscallPrintString()
 {
-  DEBUG('a', "\n SC_PrintString call ...");
+  DEBUG(dbgSys, "\n SC_PrintString call ...");
 
   char *s = readChars(4);
 
@@ -27,12 +27,12 @@ void SyscallPrintString()
 
 void SyscallPrintInt()
 {
-  DEBUG('a', "\n SC_PrintInt call ...");
+  DEBUG(dbgSys, "\n SC_PrintInt call ...");
 
   int i = readInt(4);
 
   // In số ra màn hình
-  printf("\n Printed int: %d \n", i);
+  printf("Printed int: %d\n", i);
 
   /* Modify return point */
   recoverPC();
@@ -40,7 +40,7 @@ void SyscallPrintInt()
 
 void SyscallCreateFile()
 {
-  DEBUG('a', "\n SC_Create call ...");
+  DEBUG(dbgSys, "\n SC_Create call ...");
 
   char *filename = readChars(4);
   if (!filename)
@@ -48,7 +48,8 @@ void SyscallCreateFile()
     recoverPC();
     return;
   }
-  // DEBUG('a',"\n File name : '"<<filename<<"'");
+
+  DEBUG(dbgSys, "\n File name : '" << filename << "'");
 
   //  Create file with size = 0
   //  Dùng đối tượng fileSystem của lớp OpenFile để tạo file,
@@ -58,7 +59,7 @@ void SyscallCreateFile()
   //  trên ổ đĩa là một đồ án khác
   if (!kernel->fileSystem->Create(filename))
   {
-    printf("\n Error create file '%s'\n", filename);
+    DEBUG(dbgSys, "\n Error create file '" << filename << "'");
     kernel->machine->WriteRegister(2, -1);
     delete filename;
 
@@ -67,7 +68,7 @@ void SyscallCreateFile()
 
     return;
   }
-  printf("\n Successful create file '%s'\n", filename);
+  DEBUG(dbgSys, "\n Successful create file '" << filename << "'");
   kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
   // người dùng thành công
   delete filename;
@@ -78,7 +79,7 @@ void SyscallCreateFile()
 
 void SyscallOpenFile()
 {
-  DEBUG('a', "\n SC_Open call ...");
+  DEBUG(dbgSys, "\n SC_Open call ...");
 
   char *filename = readChars(4);
   if (!filename)
@@ -92,7 +93,7 @@ void SyscallOpenFile()
   OpenFile *file = kernel->fileSystem->Open(filename, type);
   if (!file)
   {
-    printf("\n Error open file '%s'\n", filename);
+    DEBUG(dbgSys, "\n Error open file '" << filename << "'");
     kernel->machine->WriteRegister(2, (int)-1);
     delete filename;
 
@@ -101,7 +102,7 @@ void SyscallOpenFile()
 
     return;
   }
-  printf("\n Open file '%s' succesfully, file descriptor %d\n", filename, file->FileDescriptor());
+  DEBUG(dbgSys, "\n Open file '" << filename << "' succesfully, file descriptor " << file->FileDescriptor());
 
   kernel->machine->WriteRegister(2, (int)file->FileDescriptor()); // trả về cho chương trình
   // người dùng thành công
@@ -113,14 +114,14 @@ void SyscallOpenFile()
 
 void SyscallCloseFile()
 {
-  DEBUG('a', "\n SC_Close call ...");
+  DEBUG(dbgSys, "\n SC_Close call ...");
 
   int file = readInt(4);
 
   int result = kernel->fileSystem->_Close(file);
   if (result == -1)
   {
-    printf("\n Error close file with id '%d'\n", file);
+    DEBUG(dbgSys, "\n Error close file with id '" << file << "'");
     kernel->machine->WriteRegister(2, (int)-1);
 
     /* Modify return point */
@@ -128,7 +129,7 @@ void SyscallCloseFile()
 
     return;
   }
-  printf("\n Close file succesfully, file descriptor %d\n", file);
+  DEBUG(dbgSys, "\n Close file succesfully, file descriptor " << file);
 
   kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
   // người dùng thành công
@@ -139,7 +140,7 @@ void SyscallCloseFile()
 
 void SyscallReadFile()
 {
-  DEBUG('a', "\n SC_Read call ...");
+  DEBUG(dbgSys, "\n SC_Read call ...");
 
   int virtAddr = (kernel->machine->ReadRegister(4));
 
@@ -149,7 +150,7 @@ void SyscallReadFile()
 
   if (buffer == NULL)
   {
-    DEBUG('a', "\n Invalid buffer");
+    DEBUG(dbgSys, "\n Invalid buffer");
     recoverPC();
     return;
   }
@@ -163,7 +164,7 @@ void SyscallReadFile()
     OpenFile *file = kernel->fileSystem->Find(fid);
     if (file == NULL)
     {
-      printf("\n Invalid file descriptor\n");
+      DEBUG(dbgSys, "\n Invalid file descriptor");
       kernel->machine->WriteRegister(2, -1);
       delete buffer;
       recoverPC();
@@ -174,7 +175,7 @@ void SyscallReadFile()
     charcount = file->Read(buffer, charcount);
   }
 
-  printf("\n Success reading.\n");
+  DEBUG(dbgSys, "\n Read " << charcount << " characters");
   // Trả về cho chương trình người dùng số lượng ký tự đã đọc
   kernel->machine->WriteRegister(2, charcount);
 
@@ -189,7 +190,7 @@ void SyscallReadFile()
 
 void SyscallWriteFile()
 {
-  DEBUG('a', "\n SC_Write call ...");
+  DEBUG(dbgSys, "\n SC_Write call ...");
 
   char *buffer = readChars(4);
   int charcount = readInt(5);
@@ -207,7 +208,7 @@ void SyscallWriteFile()
     OpenFile *file = kernel->fileSystem->Find(fid);
     if (file == NULL)
     {
-      printf("\n Invalid file descriptor\n");
+      DEBUG(dbgSys, "\n Invalid file descriptor");
       kernel->machine->WriteRegister(2, -1);
       delete buffer;
       recoverPC();
@@ -218,7 +219,7 @@ void SyscallWriteFile()
     charcount = file->Write(buffer, charcount);
   }
 
-  printf("\n Success writing.\n");
+  DEBUG(dbgSys, "\n Write " << charcount << " characters");
   // Trả về cho chương trình người dùng số lượng ký tự đã viết
   kernel->machine->WriteRegister(2, charcount);
 
@@ -230,14 +231,14 @@ void SyscallWriteFile()
 
 void SyscallSeekFile()
 {
-  DEBUG('a', "\n SC_Seek call ...");
+  DEBUG(dbgSys, "\n SC_Seek call ...");
 
   int pos = readInt(4);
   int fid = readInt(5);
 
   if (fid == _ConsoleInput || fid == _ConsoleOutput)
   {
-    printf("\n Invalid file descriptor\n\n");
+    DEBUG(dbgSys, "\n Invalid file descriptor");
     kernel->machine->WriteRegister(2, -1);
     recoverPC();
     return;
@@ -247,7 +248,7 @@ void SyscallSeekFile()
   OpenFile *file = kernel->fileSystem->Find(fid);
   if (file == NULL || file->isSocket()) // Nếu file descriptor không hợp lệ hoặc là socket thì trả về lỗi
   {
-    printf("\n Invalid file descriptor\n");
+    DEBUG(dbgSys, "\n Invalid file descriptor");
     kernel->machine->WriteRegister(2, -1);
     recoverPC();
     return;
@@ -259,7 +260,7 @@ void SyscallSeekFile()
   // Nếu pos không hợp lệ thì trả về lỗi
   else if (pos < 0)
   {
-    printf("\n Invalid position.\n");
+    DEBUG(dbgSys, "\n Invalid position");
     kernel->machine->WriteRegister(2, -1);
     recoverPC();
     return;
@@ -268,7 +269,7 @@ void SyscallSeekFile()
   // Đặt con trỏ file tại vị trí pos
   file->Seek(pos);
 
-  printf("\n Success Seek.\n");
+  DEBUG(dbgSys, "\n Seek file succesfully, file descriptor " << fid);
 
   // Trả về vị trí của con trỏ sau khi được dịch chuyển
   kernel->machine->WriteRegister(2, pos);
@@ -279,6 +280,8 @@ void SyscallSeekFile()
 
 void SyscallRemoveFile()
 {
+  DEBUG(dbgSys, "\n SC_Remove call ...");
+
   char *filename = readChars(4);
 
   if (!filename)
@@ -291,7 +294,7 @@ void SyscallRemoveFile()
   OpenFile *file = kernel->fileSystem->Find(filename); // Find use filename
   if (file != nullptr)
   {
-    printf("Error: File '%s' is currently open and cannot be removed.\n", filename);
+    DEBUG(dbgSys, "\n File '" << filename << "' is currently open and cannot be removed.");
     kernel->machine->WriteRegister(2, -1);
     delete filename;
     recoverPC();
@@ -300,7 +303,7 @@ void SyscallRemoveFile()
 
   if (!kernel->fileSystem->Remove(filename))
   {
-    printf("Error: Could not remove file '%s'\n", filename);
+    DEBUG(dbgSys, "\n Error remove file '" << filename << "'");
     kernel->machine->WriteRegister(2, -1);
     delete filename;
     recoverPC();

@@ -7,7 +7,7 @@ void SyscallOpenSocket()
   OpenFile *file = kernel->fileSystem->_OpenSocket();
   if (!file)
   {
-    printf("\n Error open socket");
+    DEBUG('a', "\n Error open socket");
     kernel->machine->WriteRegister(2, (int)-1);
 
     /* Modify return point */
@@ -15,7 +15,7 @@ void SyscallOpenSocket()
 
     return;
   }
-  printf("\n Open socket succesfully, file descriptor %d\n", file->FileDescriptor());
+  DEBUG('a', "\n Open socket succesfully, file descriptor " << file->FileDescriptor());
 
   kernel->machine->WriteRegister(2, (int)file->FileDescriptor()); // trả về cho chương trình
   // người dùng thành công
@@ -41,7 +41,7 @@ void SyscallConnectSocket()
   int result = kernel->fileSystem->_Connect(sockID, ip, port);
   if (result == -1)
   {
-    printf("\n Error connect socket");
+    DEBUG('a', "\n Error connect socket with id " << sockID << " to " << ip << ":" << port);
     kernel->machine->WriteRegister(2, (int)-1);
     delete ip;
 
@@ -51,7 +51,7 @@ void SyscallConnectSocket()
     return;
   }
 
-  printf("\n Connect socket succesfully, file descriptor %d\n", sockID);
+  DEBUG('a', "\n Connect socket succesfully, socket ID " << sockID << " to " << ip << ":" << port);
 
   kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
   // người dùng thành công
@@ -70,7 +70,7 @@ void SyscallCloseSocket()
   int result = kernel->fileSystem->_Close(sockID);
   if (result == -1)
   {
-    printf("\n Error close socket with id '%d'", sockID);
+    DEBUG('a', "\n Error close socket with id " << sockID);
     kernel->machine->WriteRegister(2, (int)-1);
 
     /* Modify return point */
@@ -78,7 +78,7 @@ void SyscallCloseSocket()
 
     return;
   }
-  printf("\n Close socket succesfully, file descriptor %d\n", sockID);
+  DEBUG('a', "\n Close socket succesfully, file descriptor " << sockID);
 
   kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
   // người dùng thành công
@@ -107,7 +107,7 @@ void SyscallSendSocket()
   int result = kernel->fileSystem->_Send(sockID, buffer, len);
   if (result == -1)
   {
-    printf("\n Error send socket with id '%d'", sockID);
+    DEBUG('a', "\n Error send socket with id " << sockID);
     kernel->machine->WriteRegister(2, (int)-1);
     delete buffer;
 
@@ -117,7 +117,7 @@ void SyscallSendSocket()
     return;
   }
 
-  printf("\n Send to socket succesfully, socket ID %d\n", sockID);
+  DEBUG('a', "\n Send to socket succesfully, socket ID " << sockID);
 
   kernel->machine->WriteRegister(2, (int)result); // trả về cho chương trình
   // người dùng thành công
@@ -149,7 +149,7 @@ void SyscallReceiveSocket()
   int result = kernel->fileSystem->_Receive(sockID, buffer, len);
   if (result == -1)
   {
-    printf("\n Error receive socket with id '%d'", sockID);
+    DEBUG('a', "\n Error receive socket with id " << sockID);
     kernel->machine->WriteRegister(2, (int)-1);
     delete buffer;
 
@@ -159,7 +159,7 @@ void SyscallReceiveSocket()
     return;
   }
 
-  printf("\n Receive from socket succesfully, socket ID %d\n", sockID);
+  DEBUG('a', "\n Receive from socket succesfully, socket ID " << sockID);
 
   kernel->machine->WriteRegister(2, (int)result); // trả về cho chương trình
 

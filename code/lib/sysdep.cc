@@ -465,17 +465,17 @@ int Connect(int sockID, char *ip, int port)
     // form
     if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0)
     {
-        printf("\nInvalid address/ Address not supported \n");
+        DEBUG(dbgNet, "Invalid address/ Address not supported");
         return -1;
     }
 
     if (connect(sockID, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
-        printf("\nConnection Failed \n");
+        DEBUG(dbgNet, "Connection Failed");
         return -1;
     }
 
-    printf("\nConnection Successful \n");
+    DEBUG(dbgNet, "Connected to server");
     return 0;
 }
 
@@ -581,12 +581,9 @@ void ReadFromSocket(int sockID, char *buffer, int packetSize)
     {
         perror("in recvfrom");
 #if defined CYGWIN
-        cerr << "called with " << packetSize << ", got back " << retVal
-             << ", and "
-             << "\n";
+        DEBUG(dbgNet, "called with " << packetSize << ", got back " << retVal << ", and " << errno);
 #else
-        cerr << "called with " << packetSize << ", got back " << retVal
-             << ", and " << errno << "\n";
+        DEBUG(dbgNet, "called with " << packetSize << ", got back " << retVal << ", and " << errno);
 #endif
     }
     ASSERT(retVal == packetSize);
