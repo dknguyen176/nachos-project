@@ -162,7 +162,7 @@ void SyscallReadFile()
   {
     // Lấy openfile từ file descriptor
     OpenFile *file = kernel->fileSystem->Find(fid);
-    if (file == NULL)
+    if (file == NULL || fid == _ConsoleOutput) // Nếu file descriptor không hợp lệ hoặc là file descriptor của console output thì báo lỗi
     {
       DEBUG(dbgSys, "\n Invalid file descriptor");
       kernel->machine->WriteRegister(2, -1);
@@ -206,7 +206,7 @@ void SyscallWriteFile()
   {
     // Lấy openfile từ file descriptor
     OpenFile *file = kernel->fileSystem->Find(fid);
-    if (file == NULL)
+    if (file == NULL || fid == _ConsoleInput) // Nếu file descriptor không hợp lệ hoặc là file descriptor của console input thì báo lỗi
     {
       DEBUG(dbgSys, "\n Invalid file descriptor");
       kernel->machine->WriteRegister(2, -1);
