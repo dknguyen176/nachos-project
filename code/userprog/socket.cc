@@ -29,7 +29,7 @@ void SyscallConnectSocket()
   DEBUG(dbgNet, "SC_Connect call ...\n");
 
   int sockID = readInt(4);
-  char *ip = readChars(5);
+  char *ip = readChars(5, BUFFER_SIZE);
   int port = readInt(6);
 
   OpenFile *socket = kernel->fileSystem->Find(sockID);
@@ -90,7 +90,7 @@ void SyscallCloseSocket()
 void SyscallSendSocket()
 {
   int sockID = readInt(4);
-  char *buffer = readChars(5);
+  char *buffer = readChars(5, BUFFER_SIZE);
   int len = readInt(6);
 
   // Check if socket is open
@@ -132,7 +132,7 @@ void SyscallReceiveSocket()
   int virtAddr = kernel->machine->ReadRegister(5);
 
   int sockID = readInt(4);
-  char *buffer = readChars(5);
+  char *buffer = readChars(5, BUFFER_SIZE);
   int len = readInt(6);
 
   // Check if socket is open

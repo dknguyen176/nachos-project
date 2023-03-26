@@ -13,7 +13,7 @@
 extern char *User2System(int virtAddr, int limit = -1);
 extern int System2User(int virtAddr, int len, char *buffer);
 extern int readInt(int reg);
-extern char *readChars(int reg);
+extern char *readChars(int reg, int limit);
 extern void recoverPC();
 
 extern void SyscallReadString();

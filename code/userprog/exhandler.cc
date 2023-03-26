@@ -55,18 +55,18 @@ int readInt(int reg)
   return num;
 }
 
-char *readChars(int reg)
+char *readChars(int reg, int limit)
 {
   int virtAddr;
   char *str;
-  DEBUG(dbgSys, "Reading virtual address of string\n");
 
   // Lấy tham số tên tập tin từ thanh ghi reg
+  DEBUG(dbgSys, "Reading virtual address of string\n");
   virtAddr = kernel->machine->ReadRegister(reg);
-  DEBUG(dbgSys, "Reading string\n");
 
   // MaxFileLength là = 32
-  str = User2System(virtAddr, MAXFILELENGTH);
+  DEBUG(dbgSys, "Reading string\n");
+  str = User2System(virtAddr, limit);
   if (str == NULL)
   {
     DEBUG(dbgSys, "Not enough memory in system\n");

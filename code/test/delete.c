@@ -1,31 +1,42 @@
 #include "syscall.h"
-// #include "copyright.h"
 
-#define maxlen 32
+int _strcpy(char *dest, char *src)
+{
+    int len = 0;
+    while (*src != '\0')
+    {
+        *dest = *src;
+        dest++;
+        src++;
+        len++;
+    }
+    *dest = '\0';
+    return len;
+}
 
 int main(int argc, char *argv[])
 {
-    int len, fd;
-    char *filename;
-
-    filename = argv[1];
+    int len;
+    char *filename, msg[BUFFER_SIZE + 1];
 
     if (argc < 2)
     {
-        PrintString("Usage: delete <filename>\n");
+        len = _strcpy(msg, "Usage: delete <filename>\n");
+        Write(msg, len, _ConsoleOutput);
         Halt();
     }
 
-    // fd = Open(filename, 0);
+    filename = argv[1];
 
     if (Remove(filename) == -1)
     {
-        PrintString("Delete failed\n");
+        len = _strcpy(msg, "Delete file error\n");
+        Write(msg, len, _ConsoleOutput);
     }
     else
     {
-        // xuất thông báo xóa tập tin thành công
-        PrintString("Delete successfully\n");
+        len = _strcpy(msg, "Delete file successfully\n");
+        Write(msg, len, _ConsoleOutput);
     }
     Halt();
 }

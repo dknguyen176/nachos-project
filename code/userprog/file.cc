@@ -14,7 +14,7 @@ void SyscallPrintString()
 {
   DEBUG(dbgSys, "SC_PrintString call ...\n");
 
-  char *s = readChars(4);
+  char *s = readChars(4, BUFFER_SIZE);
 
   // In xâu ra màn hình
   SysWriteConsole(s, strlen(s));
@@ -42,7 +42,7 @@ void SyscallCreateFile()
 {
   DEBUG(dbgSys, "SC_Create call ...\n");
 
-  char *filename = readChars(4);
+  char *filename = readChars(4, MAXFILELENGTH);
   if (!filename)
   {
     recoverPC();
@@ -81,7 +81,7 @@ void SyscallOpenFile()
 {
   DEBUG(dbgSys, "SC_Open call ...\n");
 
-  char *filename = readChars(4);
+  char *filename = readChars(4, MAXFILELENGTH);
   if (!filename)
   {
     recoverPC();
@@ -144,7 +144,7 @@ void SyscallReadFile()
 
   int virtAddr = (kernel->machine->ReadRegister(4));
 
-  char *buffer = readChars(4);
+  char *buffer = readChars(4, BUFFER_SIZE);
   int charcount = readInt(5);
   int fid = readInt(6);
 
@@ -192,7 +192,7 @@ void SyscallWriteFile()
 {
   DEBUG(dbgSys, "SC_Write call ...\n");
 
-  char *buffer = readChars(4);
+  char *buffer = readChars(4, BUFFER_SIZE);
   int charcount = readInt(5);
   int fid = readInt(6);
 
@@ -282,7 +282,7 @@ void SyscallRemoveFile()
 {
   DEBUG(dbgSys, "SC_Remove call ...\n");
 
-  char *filename = readChars(4);
+  char *filename = readChars(4, MAXFILELENGTH);
 
   if (!filename)
   {

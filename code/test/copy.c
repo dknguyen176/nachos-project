@@ -1,53 +1,64 @@
 #include "syscall.h"
-// #include "copyright.h"
+
+int _strcpy(char *dest, char *src)
+{
+    int len = 0;
+    while (*src != '\0')
+    {
+        *dest = *src;
+        dest++;
+        src++;
+        len++;
+    }
+    *dest = '\0';
+    return len;
+}
 
 int main(int argc, char *argv[])
 {
+    int len;
     OpenFileId fdsrc, fddst;
-    char *filenameSrc;
-    char *filenameDst;
-    char c;
-    char buffer[101];
-    int size, i;
+    char *filenameSrc, *filenameDst;
+    char buffer[BUFFER_SIZE + 1], msg[BUFFER_SIZE + 1];
 
     if (argc < 3)
     {
-        PrintString("Usage: copy <source> <destination>\n");
+        len = _strcpy(msg, "Usage: copy <filenameSrc> <filenameDst>\n");
+        Write(msg, len, _ConsoleOutput);
         Halt();
     }
 
     filenameSrc = argv[1];
     filenameDst = argv[2];
 
-    fdsrc = Open(filenameSrc, 0);
+    fdsrc = Open(filenameSrc, O_RDWR);
 
     if (Create(filenameDst) == -1)
     {
-        // xuất thông báo lỗi tạo tập tin
+        len = _strcpy(msg, "Create file error\n");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
     }
-    else
-    {
-        // xuất thông báo tạo tập tin thành công
-    }
-
-    fddst = Open(filenameDst, 0);
+    fddst = Open(filenameDst, O_RDWR);
 
     if (fdsrc == -1 || fddst == -1)
     {
-        PrintString("copy failed\n");
-        return 0;
+        len = _strcpy(msg, "Open file error\n");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
     }
 
     Seek(0, fdsrc);
     Seek(0, fddst);
 
-    Read(buffer, 100, fdsrc);
-    Write(buffer, 100, fddst);
+    Read(buffer, BUFFER_SIZE, fdsrc);
+    Write(buffer, BUFFER_SIZE, fddst);
 
     Close(fdsrc);
     Close(fddst);
 
-    PrintString("Copy successfully\n");
+    len = _strcpy(msg, "Copy file successfully\n");
+    Write(msg, len, _ConsoleOutput);
 
     Halt();
 }

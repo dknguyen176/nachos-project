@@ -46,6 +46,10 @@
 #define SC_PrintInt 44
 #define SC_ReadString 45
 
+#define O_RDWR 0
+#define O_RDONLY 1
+#define BUFFER_SIZE 100
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
