@@ -73,7 +73,7 @@ void ExceptionHandler(ExceptionType which)
 			/* Process SysAdd Systemcall*/
 			int result;
 			result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-							/* int op2 */ (int)kernel->machine->ReadRegister(5));
+											/* int op2 */ (int)kernel->machine->ReadRegister(5));
 
 			DEBUG(dbgSys, "Add returning with " << result << "\n");
 			/* Prepare Result */
@@ -111,18 +111,6 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Seek:
 			SyscallSeekFile();
-			return;
-
-		case SC_ReadString:
-			SyscallReadString();
-			return;
-
-		case SC_PrintString:
-			SyscallPrintString();
-			return;
-
-		case SC_PrintInt:
-			SyscallPrintInt();
 			return;
 
 		case SC_Remove:

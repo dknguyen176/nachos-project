@@ -1,43 +1,6 @@
 #include "exhandler.h"
 #include <stdlib.h>
 
-void SyscallReadString()
-{
-  DEBUG(dbgSys, "SC_ReadString call ...\n");
-
-  kernel->machine->WriteRegister(6, _ConsoleInput);
-
-  SyscallReadFile();
-}
-
-void SyscallPrintString()
-{
-  DEBUG(dbgSys, "SC_PrintString call ...\n");
-
-  char *s = readChars(4, BUFFER_SIZE);
-
-  // In xâu ra màn hình
-  SysWriteConsole(s, strlen(s));
-
-  delete s;
-
-  /* Modify return point */
-  recoverPC();
-}
-
-void SyscallPrintInt()
-{
-  DEBUG(dbgSys, "SC_PrintInt call ...\n");
-
-  int i = readInt(4);
-
-  // In số ra màn hình
-  printf("Printed int: %d\n", i);
-
-  /* Modify return point */
-  recoverPC();
-}
-
 void SyscallCreateFile()
 {
   DEBUG(dbgSys, "SC_Create call ...\n");

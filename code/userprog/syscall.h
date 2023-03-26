@@ -42,9 +42,6 @@
 #define SC_CloseSocket 24
 
 #define SC_Add 42
-#define SC_PrintString 43
-#define SC_PrintInt 44
-#define SC_ReadString 45
 
 #define O_RDWR 0
 #define O_RDONLY 1
@@ -65,11 +62,6 @@
 
 /* Stop Nachos, and print out performance stats */
 void Halt();
-
-void ReadString(char *s, int length);
-void PrintString(char *s);
-
-void PrintInt(int n);
 
 /*
  * Add the two operants and return the result
