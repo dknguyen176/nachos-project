@@ -29,6 +29,7 @@ int main(int argc, char const *argv[])
     int opt = 1;
     int addrlen = sizeof(address);
     char buffer[1024] = {0};
+    char tmp[1024] = {0};
     char *hello = "Hello from server";
 
     // Creating socket file descriptor
@@ -73,6 +74,7 @@ int main(int argc, char const *argv[])
         }
 
         // Nhận tin nhắn từ client
+        memset(buffer, 0, sizeof(buffer));
         valread = read(new_socket, buffer, 1024);
         toUpper(buffer);
 

@@ -34,9 +34,13 @@ void SyscallConnectSocket()
 
   OpenFile *socket = kernel->fileSystem->Find(sockID);
   if (!socket)
-    cerr << "Socket is not open\n";
+  {
+    DEBUG(dbgNet, "Socket not open\n");
+  }
   else
-    cerr << "Socket open, fd " << socket->FileDescriptor() << '\n';
+  {
+    DEBUG(dbgNet, "Socket open at " << socket->FileDescriptor() << "\n");
+  }
 
   int result = socket->SocketConnect(ip, port);
   if (result == -1)

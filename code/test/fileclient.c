@@ -1,66 +1,114 @@
 #include "syscall.h"
 
-#define PORT 8080
+const char *IP = "127.0.0.1";
+const int PORT = 8080;
+
+int _strcpy(char *dest, const char *src)
+{
+    int i = 0;
+    while (src[i] != '\0')
+    {
+        dest[i] = src[i];
+        i++;
+    }
+    dest[i] = '\0';
+    return i;
+}
 
 int main(int argc, char *argv[])
 {
-    int fdsrc, fddst, sockID, result;
-    char receiveMessage[101];
-
-    char *srcfilename, filecontent[101], *dstfilename;
     OpenFileId fd;
+    int fdsrc, fddst, sockID, result, len;
+    char *srcfilename, *dstfilename;
+    char ip[IP_LENGTH + 1];
+    char msg[BUFFER_SIZE + 1];
+    char filecontent[BUFFER_SIZE + 1];
+    char receiveMessage[BUFFER_SIZE + 1];
 
     if (argc < 3)
     {
-        PrintString("Usage: fileclient <filename>\n");
+        len = _strcpy(msg, "Usage: fileclient <srcfilename> <dstfilename>");
+        Write(msg, len, _ConsoleOutput);
         Halt();
     }
 
     srcfilename = argv[1];
     dstfilename = argv[2];
 
-    fdsrc = Open(srcfilename, 0);
+    // Open source file
+    fdsrc = Open(srcfilename, O_RDONLY);
 
+    // Open/Create destination file
     if (Create(dstfilename) == -1)
     {
-        // xuất thông báo lỗi tạo tập tin
+        len = _strcpy(msg, "Can not create file");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
     }
-    else
-    {
-        // xuất thông báo tạo tập tin thành công
-    }
-
-    fddst = Open(dstfilename, 0);
+    fddst = Open(dstfilename, O_RDWR);
 
     if (fdsrc == -1 || fddst == -1)
     {
-        PrintString("Can not open file\n");
-        return 0;
+        len = _strcpy(msg, "Can not open file");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
     }
 
     Seek(0, fdsrc);
     Seek(0, fddst);
+    Read(filecontent, BUFFER_SIZE, fdsrc);
 
-    Read(filecontent, 100, fdsrc);
-
+    // Connect to server
+    _strcpy(ip, IP);
     sockID = OpenSocket();
-
-    result = Connect(sockID, "127.0.0.1", PORT);
+    if (sockID == -1)
+    {
+        len = _strcpy(msg, "Can not open socket");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
+    }
+    if (Connect(sockID, ip, PORT) == -1)
+    {
+        len = _strcpy(msg, "Can not connect to server");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
+    }
 
     // result = Send(sockID, "Hello from client", 17);
     // result = Receive(sockID, receiveMessage, 100);
 
     // Use Write and Read instead of Send and Receive
-    result = Write(filecontent, 17, sockID);
-    result = Read(receiveMessage, 100, sockID);
+    if (Write(filecontent, BUFFER_SIZE, sockID) == -1)
+    {
+        len = _strcpy(msg, "Can not write to socket");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
+    }
+    if (Read(receiveMessage, BUFFER_SIZE, sockID) == -1)
+    {
+        len = _strcpy(msg, "Can not read from socket");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
+    }
 
-    PrintString(receiveMessage);
+    Write(receiveMessage, BUFFER_SIZE, fddst);
 
-    Write(receiveMessage, 100, fddst);
+    len = _strcpy(msg, "File transfered\n");
+    Write(msg, len, _ConsoleOutput);
 
-    PrintString("\nFileclient successfuly\n");
+    if (Close(fdsrc) == -1 || Close(fddst) == -1)
+    {
+        len = _strcpy(msg, "Can not close file");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
+    }
 
-    result = CloseSocket(sockID);
+    if (CloseSocket(sockID) == -1)
+    {
+        len = _strcpy(msg, "Can not close socket");
+        Write(msg, len, _ConsoleOutput);
+        Halt();
+    }
 
     Halt();
     /* not reached */

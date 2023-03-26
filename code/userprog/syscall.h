@@ -49,6 +49,7 @@
 #define O_RDWR 0
 #define O_RDONLY 1
 #define BUFFER_SIZE 100
+#define IP_LENGTH 16
 
 #ifndef IN_ASM
 
