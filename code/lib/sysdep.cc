@@ -450,7 +450,7 @@ int OpenSocket2()
 }
 
 //----------------------------------------------------------------------
-// ConnectSocket
+// Connect
 // 	Connect to server according to IP and port information.
 //  Returns 0 if the connection is successful, and -1 if it fails.
 //----------------------------------------------------------------------
@@ -461,8 +461,7 @@ int Connect(int sockID, char *ip, int port)
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(port);
 
-    // Convert IPv4 and IPv6 addresses from text to binary
-    // form
+    // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0)
     {
         DEBUG(dbgNet, "Invalid address/ Address not supported");

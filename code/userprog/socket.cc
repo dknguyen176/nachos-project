@@ -4,7 +4,7 @@ void SyscallOpenSocket()
 {
   DEBUG(dbgNet, "SC_OpenSocket call ...\n");
 
-  OpenFile *file = kernel->fileSystem->_OpenSocket();
+  OpenFile *file = kernel->fileSystem->SocketOpen();
   if (!file)
   {
     DEBUG(dbgNet, "Error open socket\n");
@@ -38,7 +38,7 @@ void SyscallConnectSocket()
   else
     cerr << "Socket open, fd " << socket->FileDescriptor() << '\n';
 
-  int result = kernel->fileSystem->_Connect(sockID, ip, port);
+  int result = socket->SocketConnect(ip, port);
   if (result == -1)
   {
     DEBUG(dbgNet, "Error connect socket with id " << sockID << " to " << ip << ":" << port << "\n");
@@ -67,7 +67,7 @@ void SyscallCloseSocket()
 
   int sockID = readInt(4);
 
-  int result = kernel->fileSystem->_Close(sockID);
+  int result = kernel->fileSystem->CloseFile(sockID);
   if (result == -1)
   {
     DEBUG(dbgNet, "Error close socket with id " << sockID << "\n");
@@ -104,7 +104,7 @@ void SyscallSendSocket()
     return;
   }
 
-  int result = kernel->fileSystem->_Send(sockID, buffer, len);
+  int result = socket->SocketSend(buffer, len);
   if (result == -1)
   {
     DEBUG(dbgNet, "Error send socket with id " << sockID << "\n");
@@ -146,7 +146,7 @@ void SyscallReceiveSocket()
     return;
   }
 
-  int result = kernel->fileSystem->_Receive(sockID, buffer, len);
+  int result = socket->SocketReceive(buffer, len);
   if (result == -1)
   {
     DEBUG(dbgNet, "Error receive socket with id " << sockID << "\n");

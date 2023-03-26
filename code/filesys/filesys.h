@@ -56,12 +56,9 @@ public:
 	OpenFile *Find(int id);
 	OpenFile *Find(char *name);
 	bool Remove(char *name);
+	int CloseFile(OpenFileID id);
 
-	OpenFile *_OpenSocket();
-	int _Connect(int sockID, char *ip, int port);
-	int _Send(int sockID, char *buffer, int size);
-	int _Receive(int sockID, char *buffer, int size);
-	int _Close(OpenFileID id);
+	OpenFile *SocketOpen();
 
 private:
 	OpenFile *table[TABLESIZE];

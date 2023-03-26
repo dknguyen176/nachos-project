@@ -41,6 +41,10 @@ public:
 	int Read(char *into, int numBytes);
 	int Write(char *from, int numBytes);
 
+	int SocketConnect(char *ip, int port);
+	int SocketSend(char *buffer, int size);
+	int SocketReceive(char *buffer, int size);
+
 	int Length();
 	bool isSocket();
 	int FileDescriptor();

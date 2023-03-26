@@ -99,7 +99,7 @@ OpenFile *FileSystem::Open(char *name, int type)
     return NULL; // Out of space
 }
 
-int FileSystem::_Close(OpenFileID id)
+int FileSystem::CloseFile(OpenFileID id)
 {
     // Find file in table
     for (int i = 0; i < TABLESIZE; i++)
@@ -130,7 +130,7 @@ OpenFile *FileSystem::Find(char *name)
 
 bool FileSystem::Remove(char *name) { return Unlink(name) == 0; }
 
-OpenFile *FileSystem::_OpenSocket()
+OpenFile *FileSystem::SocketOpen()
 {
     int fd = OpenSocket2();
 
@@ -143,24 +143,6 @@ OpenFile *FileSystem::_OpenSocket()
         }
 
     return NULL;
-}
-
-int FileSystem::_Connect(int sockID, char *ip, int port)
-{
-    int result = Connect(sockID, ip, port);
-    return result;
-}
-
-int FileSystem::_Send(int sockID, char *buffer, int size)
-{
-    int result = SendSocket(sockID, buffer, size);
-    return result;
-}
-
-int FileSystem::_Receive(int sockID, char *buffer, int size)
-{
-    int result = ReceiveSocket(sockID, buffer, size);
-    return result;
 }
 
 #else // FILESYS_STUB

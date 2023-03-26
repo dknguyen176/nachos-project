@@ -83,6 +83,24 @@ int OpenFile::Write(char *from, int numBytes)
     return numWritten;
 }
 
+int OpenFile::SocketConnect(char *ip, int port)
+{
+    int result = Connect(file, ip, port);
+    return result;
+}
+
+int OpenFile::SocketSend(char *buffer, int size)
+{
+    int result = SendSocket(file, buffer, size);
+    return result;
+}
+
+int OpenFile::SocketReceive(char *buffer, int size)
+{
+    int result = ReceiveSocket(file, buffer, size);
+    return result;
+}
+
 int OpenFile::Length()
 {
     Lseek(file, 0, 2);

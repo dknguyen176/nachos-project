@@ -118,7 +118,7 @@ void SyscallCloseFile()
 
   int file = readInt(4);
 
-  int result = kernel->fileSystem->_Close(file);
+  int result = kernel->fileSystem->CloseFile(file);
   if (result == -1)
   {
     DEBUG(dbgSys, "Error close file with id '" << file << "'\n");
@@ -311,6 +311,7 @@ void SyscallRemoveFile()
   }
 
   delete filename;
+  kernel->machine->WriteRegister(2, 0);
 
   /* Modify return point */
   recoverPC();
