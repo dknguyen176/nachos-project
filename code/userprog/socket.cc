@@ -2,12 +2,12 @@
 
 void SyscallOpenSocket()
 {
-  DEBUG(dbgNet, "SC_OpenSocket call ...\n");
+  DEBUG(dbgSys, "SC_OpenSocket call ...\n");
 
   OpenFile *file = kernel->fileSystem->SocketOpen();
   if (!file)
   {
-    DEBUG(dbgNet, "Error open socket\n");
+    DEBUG(dbgSys, "Error open socket\n");
     kernel->machine->WriteRegister(2, (int)-1);
 
     /* Modify return point */
@@ -15,7 +15,7 @@ void SyscallOpenSocket()
 
     return;
   }
-  DEBUG(dbgNet, "Open socket succesfully, file descriptor " << file->FileDescriptor() << "\n");
+  DEBUG(dbgSys, "Open socket succesfully, file descriptor " << file->FileDescriptor() << "\n");
 
   kernel->machine->WriteRegister(2, (int)file->FileDescriptor()); // trả về cho chương trình
   // người dùng thành công
@@ -26,7 +26,7 @@ void SyscallOpenSocket()
 
 void SyscallConnectSocket()
 {
-  DEBUG(dbgNet, "SC_Connect call ...\n");
+  DEBUG(dbgSys, "SC_Connect call ...\n");
 
   int sockID = readInt(4);
   char *ip = readChars(5, BUFFER_SIZE);
@@ -35,17 +35,17 @@ void SyscallConnectSocket()
   OpenFile *socket = kernel->fileSystem->Find(sockID);
   if (!socket)
   {
-    DEBUG(dbgNet, "Socket not open\n");
+    DEBUG(dbgSys, "Socket not open\n");
   }
   else
   {
-    DEBUG(dbgNet, "Socket open at " << socket->FileDescriptor() << "\n");
+    DEBUG(dbgSys, "Socket open at " << socket->FileDescriptor() << "\n");
   }
 
   int result = socket->SocketConnect(ip, port);
   if (result == -1)
   {
-    DEBUG(dbgNet, "Error connect socket with id " << sockID << " to " << ip << ":" << port << "\n");
+    DEBUG(dbgSys, "Error connect socket with id " << sockID << " to " << ip << ":" << port << "\n");
     kernel->machine->WriteRegister(2, (int)-1);
     delete ip;
 
@@ -55,7 +55,7 @@ void SyscallConnectSocket()
     return;
   }
 
-  DEBUG(dbgNet, "Connect socket succesfully, socket ID " << sockID << " to " << ip << ":" << port << "\n");
+  DEBUG(dbgSys, "Connect socket succesfully, socket ID " << sockID << " to " << ip << ":" << port << "\n");
 
   kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
   // người dùng thành công
@@ -67,14 +67,14 @@ void SyscallConnectSocket()
 
 void SyscallCloseSocket()
 {
-  DEBUG(dbgNet, "SC_CloseSocket call ...\n");
+  DEBUG(dbgSys, "SC_CloseSocket call ...\n");
 
   int sockID = readInt(4);
 
   int result = kernel->fileSystem->CloseFile(sockID);
   if (result == -1)
   {
-    DEBUG(dbgNet, "Error close socket with id " << sockID << "\n");
+    DEBUG(dbgSys, "Error close socket with id " << sockID << "\n");
     kernel->machine->WriteRegister(2, (int)-1);
 
     /* Modify return point */
@@ -82,7 +82,7 @@ void SyscallCloseSocket()
 
     return;
   }
-  DEBUG(dbgNet, "Close socket succesfully, file descriptor " << sockID << "\n");
+  DEBUG(dbgSys, "Close socket succesfully, file descriptor " << sockID << "\n");
 
   kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
   // người dùng thành công
@@ -111,7 +111,7 @@ void SyscallSendSocket()
   int result = socket->SocketSend(buffer, len);
   if (result == -1)
   {
-    DEBUG(dbgNet, "Error send socket with id " << sockID << "\n");
+    DEBUG(dbgSys, "Error send socket with id " << sockID << "\n");
     kernel->machine->WriteRegister(2, (int)-1);
     delete buffer;
 
@@ -121,7 +121,7 @@ void SyscallSendSocket()
     return;
   }
 
-  DEBUG(dbgNet, "Send to socket succesfully, socket ID " << sockID << "\n");
+  DEBUG(dbgSys, "Send to socket succesfully, socket ID " << sockID << "\n");
 
   kernel->machine->WriteRegister(2, (int)result); // trả về cho chương trình
   // người dùng thành công
@@ -153,7 +153,7 @@ void SyscallReceiveSocket()
   int result = socket->SocketReceive(buffer, len);
   if (result == -1)
   {
-    DEBUG(dbgNet, "Error receive socket with id " << sockID << "\n");
+    DEBUG(dbgSys, "Error receive socket with id " << sockID << "\n");
     kernel->machine->WriteRegister(2, (int)-1);
     delete buffer;
 
@@ -163,7 +163,7 @@ void SyscallReceiveSocket()
     return;
   }
 
-  DEBUG(dbgNet, "Receive from socket succesfully, socket ID " << sockID << "\n");
+  DEBUG(dbgSys, "Receive from socket succesfully, socket ID " << sockID << "\n");
 
   kernel->machine->WriteRegister(2, (int)result); // trả về cho chương trình
 

@@ -26,6 +26,7 @@
 #include "copyright.h"
 #include "debug.h"
 #include "sysdep.h"
+#include "sys/stat.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
@@ -413,6 +414,18 @@ int Close(int fd)
 bool Unlink(char *name)
 {
     return unlink(name);
+}
+
+//----------------------------------------------------------------------
+// IsSocket
+// 	Check if a file descriptor is a socket.
+//----------------------------------------------------------------------
+
+int IsSocket(int fd)
+{
+    struct stat buf;
+    int retVal = fstat(fd, &buf);
+    return S_ISSOCK(buf.st_mode);
 }
 
 //----------------------------------------------------------------------

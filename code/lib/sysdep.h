@@ -66,6 +66,7 @@ extern "C"
 }
 
 // Interprocess communication operations, for simulating the network
+extern int IsSocket(int fd);
 extern int OpenSocket();
 extern int OpenSocket2();
 extern int Connect(int sockID, char *ip, int port);

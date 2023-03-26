@@ -114,9 +114,7 @@ int OpenFile::FileDescriptor()
 
 bool OpenFile::isSocket()
 {
-    struct stat s;
-    fstat(file, &s);
-    return S_ISSOCK(s.st_mode);
+    return IsSocket(file);
 }
 
 char *OpenFile::Filename()
