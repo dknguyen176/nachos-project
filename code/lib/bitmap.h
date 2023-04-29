@@ -40,6 +40,7 @@ public:
   void Mark(int which);       // Set the "nth" bit
   void Clear(int which);      // Clear the "nth" bit
   bool Test(int which) const; // Is the "nth" bit set?
+  int Find();                 // Find and return the index of the first clear bit
   int FindAndSet();           // Return the # of a clear bit, and as a side
                               // effect, set the bit.
                               // If no bits are clear, return -1.

@@ -101,6 +101,24 @@ bool Bitmap::Test(int which) const
 }
 
 //----------------------------------------------------------------------
+// Bitmap::Find
+// Return the number of the first bit which is clear.
+// If no bits are clear, return -1.
+//----------------------------------------------------------------------
+
+int Bitmap::Find()
+{
+    for (int i = 0; i < numBits; i++)
+    {
+        if (!Test(i))
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+//----------------------------------------------------------------------
 // Bitmap::FindAndSet
 // 	Return the number of the first bit which is clear.
 //	As a side effect, set the bit (mark it as in use).
