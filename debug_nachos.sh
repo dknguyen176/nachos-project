@@ -4,4 +4,4 @@ set -e
 cd code/test
 make
 
-../build.linux/nachos -s -d + -x $*
+../build.linux/nachos -d u -x $*

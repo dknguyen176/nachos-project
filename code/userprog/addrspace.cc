@@ -147,17 +147,6 @@ bool AddrSpace::Load(char *fileName)
 
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
-#ifdef RDATA
-    if (noffH.readonlyData.size > 0)
-    {
-        DEBUG(dbgAddr, "Initializing read only data segment.");
-        DEBUG(dbgAddr, noffH.readonlyData.virtualAddr << ", " << noffH.readonlyData.size);
-        executable->ReadAt(
-            &(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]),
-            noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
-    }
-#endif
-
     pageTable = new TranslationEntry[numPages];
     for (int i = 0; i < numPages; i++)
     {
@@ -259,6 +248,48 @@ bool AddrSpace::Load(char *fileName)
             dataSize -= copySize;
         }
     }
+
+#ifdef RDATA
+    if (noffH.readonlyData.size > 0)
+    {
+        DEBUG(dbgAddr, "Initializing read only data segment.");
+        DEBUG(dbgAddr, noffH.readonlyData.virtualAddr << ", " << noffH.readonlyData.size);
+        /*
+        executable->ReadAt(
+            &(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]),
+            noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
+        */
+
+        // for each page in read only data segment
+        // copy the page from executable to physical memory
+
+        int rdataSize = noffH.readonlyData.size;                                                      // remaining size of the read only data segment
+        int rdataPageStart = noffH.readonlyData.virtualAddr / PageSize;                               // the first page of the read only data segment
+        int rdataPageEnd = (noffH.readonlyData.virtualAddr + noffH.readonlyData.size - 1) / PageSize; // the last page of the read only data segment
+
+        for (int i = rdataPageStart; i <= rdataPageEnd; i++)
+        {
+            int physicalAddr = pageTable[i].physicalPage * PageSize;
+            int virtualAddr = i * PageSize;
+            int copySize = PageSize;
+
+            if (i == rdataPageStart)
+            {
+                copySize = PageSize - (noffH.readonlyData.virtualAddr % PageSize); // read only the remaining size of the page
+            }
+            else if (i == rdataPageEnd)
+            {
+                copySize = rdataSize % PageSize; // read only the first size of the page
+            }
+
+            executable->ReadAt(
+                &(kernel->machine->mainMemory[physicalAddr]),
+                copySize, noffH.readonlyData.inFileAddr + virtualAddr - noffH.readonlyData.virtualAddr);
+
+            rdataSize -= copySize;
+        }
+    }
+#endif
 
     delete executable; // close file
     return TRUE;       // success
