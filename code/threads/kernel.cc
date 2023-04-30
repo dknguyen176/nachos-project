@@ -124,6 +124,11 @@ void Kernel::Initialize()
     postOfficeIn = new PostOfficeInput(10);
     postOfficeOut = new PostOfficeOutput(reliability);
 
+    addrLock = new Semaphore("addrLock", 1);
+    gPhysPageBitMap = new Bitmap(NumPhysPages);
+    semTab = new STable;   // semaphore table
+    pTab = new PTable(10); // process table
+
     interrupt->Enable();
 }
 

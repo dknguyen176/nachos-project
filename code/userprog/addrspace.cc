@@ -164,7 +164,7 @@ bool AddrSpace::Load(char *fileName)
         // pageTable[i].virtualPage = i; // for now, virt page # = phys page #
         // MODIFIED: now virtualPage will need to find the available page on physical using gPhysPageBitMap
         pageTable[i].virtualPage = i;
-        pageTable[i].physicalPage = kernel->gPhysPageBitMap->Find();
+        pageTable[i].physicalPage = kernel->gPhysPageBitMap->FindAndSet();
         pageTable[i].valid = TRUE;
         pageTable[i].use = FALSE;
         pageTable[i].dirty = FALSE;
@@ -189,12 +189,34 @@ bool AddrSpace::Load(char *fileName)
             &(kernel->machine->mainMemory[noffH.code.virtualAddr]),
             noffH.code.size, noffH.code.inFileAddr);
         */
-        for (int i = 0; i < numPages; i++)
+
+        // for each page in code segment
+        // copy the page from executable to physical memory
+
+        int codeSize = noffH.code.size;                                              // remaining size of the code segment
+        int codePageStart = noffH.code.virtualAddr / PageSize;                       // the first page of the code segment
+        int codePageEnd = (noffH.code.virtualAddr + noffH.code.size - 1) / PageSize; // the last page of the code segment
+
+        for (int i = codePageStart; i <= codePageEnd; i++)
         {
+            int physicalAddr = pageTable[i].physicalPage * PageSize;
+            int virtualAddr = i * PageSize;
+            int copySize = PageSize;
+
+            if (i == codePageStart)
+            {
+                copySize = PageSize - (noffH.code.virtualAddr % PageSize); // read only the remaining size of the page
+            }
+            else if (i == codePageEnd)
+            {
+                copySize = codeSize % PageSize; // read only the first size of the page
+            }
+
             executable->ReadAt(
-                &(kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize]),
-                PageSize, noffH.code.inFileAddr + i * PageSize);
-            break;
+                &(kernel->machine->mainMemory[physicalAddr]),
+                copySize, noffH.code.inFileAddr + virtualAddr - noffH.code.virtualAddr);
+
+            codeSize -= copySize;
         }
     }
     if (noffH.initData.size > 0)
@@ -208,12 +230,33 @@ bool AddrSpace::Load(char *fileName)
             noffH.initData.size, noffH.initData.inFileAddr);
         */
 
-        for (int i = 0; i < numPages; i++)
+        // for each page in data segment
+        // copy the page from executable to physical memory
+
+        int dataSize = noffH.initData.size;                                                  // remaining size of the data segment
+        int dataPageStart = noffH.initData.virtualAddr / PageSize;                           // the first page of the data segment
+        int dataPageEnd = (noffH.initData.virtualAddr + noffH.initData.size - 1) / PageSize; // the last page of the data segment
+
+        for (int i = dataPageStart; i <= dataPageEnd; i++)
         {
+            int physicalAddr = pageTable[i].physicalPage * PageSize;
+            int virtualAddr = i * PageSize;
+            int copySize = PageSize;
+
+            if (i == dataPageStart)
+            {
+                copySize = PageSize - (noffH.initData.virtualAddr % PageSize); // read only the remaining size of the page
+            }
+            else if (i == dataPageEnd)
+            {
+                copySize = dataSize % PageSize; // read only the first size of the page
+            }
+
             executable->ReadAt(
-                &(kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize]),
-                PageSize, noffH.initData.inFileAddr + i * PageSize);
-            break;
+                &(kernel->machine->mainMemory[physicalAddr]),
+                copySize, noffH.initData.inFileAddr + virtualAddr - noffH.initData.virtualAddr);
+
+            dataSize -= copySize;
         }
     }
 

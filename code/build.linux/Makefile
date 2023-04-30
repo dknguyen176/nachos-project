@@ -301,9 +301,10 @@ USERPROG_C = ../userprog/addrspace.cc\
 	../userprog/ksyscall.cc\
 	../userprog/exhandler.cc\
 	../userprog/file.cc\
-	../userprog/socket.cc
+	../userprog/socket.cc\
+	../userprog/multiprog.cc
 
-USERPROG_O = addrspace.o ksyscall.o exception.o synchconsole.o exhandler.o file.o socket.o
+USERPROG_O = addrspace.o ksyscall.o exception.o synchconsole.o exhandler.o file.o socket.o multiprog.o
 
 FILESYS_H =../filesys/directory.h \
 	../filesys/filehdr.h\
