@@ -28,7 +28,6 @@ class SynchConsoleInput;
 class SynchConsoleOutput;
 class SynchDisk;
 class Semaphore;
-
 class Kernel
 {
 public:

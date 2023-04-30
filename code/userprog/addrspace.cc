@@ -16,10 +16,11 @@
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
-#include "main.h"
 #include "addrspace.h"
 #include "machine.h"
 #include "bitmap.h"
+#include "synch.h"
+#include "main.h"
 
 #include "noff.h"
 

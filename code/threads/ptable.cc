@@ -1,4 +1,5 @@
 #include "ptable.h"
+#include "synch.h"
 
 PTable::PTable(int size)
 {
