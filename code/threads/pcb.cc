@@ -96,16 +96,19 @@ int PCB::Exec(char *filename, int pid)
         mutex->V();
         return -1;
     }
-    thread->processID = pid;                                   // Set processID of this thread to id.
-    parentID = kernel->currentThread->processID;               // Set the parentID of this thread to be the processID of the thread calling Exec
-    thread->Fork((VoidFunctionPtr)StartProcess, (void *)&pid); // Fork a thread to run StartProcess
+    thread->processID = pid;                     // Set processID of this thread to id.
+    parentID = kernel->currentThread->processID; // Set the parentID of this thread to be the processID of the thread calling Exec
+
+    int *zz = new int;              // create a new int pointer to pass to StartProcess function as parameter
+    *zz = pid;                      // note that if we pass &pid, the value of pid will be destroyed after this function, so we need to create a new int pointer
+    thread->Fork(StartProcess, zz); // Fork a thread to run StartProcess
     mutex->V();
 }
 
-void StartProcess(int *id)
+void StartProcess(void *id)
 {
     // Use load and run to load the executable file into the address space of the current thread
-    int pid = *id;
+    int pid = *(int *)id;
     char *filename = kernel->pTab->GetFileName(pid);
     AddrSpace *space = new AddrSpace();
     if (!space->Load(filename))

@@ -12,7 +12,7 @@ PTable::PTable(int size)
     bm->Mark(0);
     pcb[0] = new PCB(0);
     pcb[0]->parentID = -1;
-    pcb[0]->SetFileName("./test/shell"); // The first process will run the shell
+    pcb[0]->SetFileName("shell"); // The first process will run the shell
 }
 
 PTable::~PTable()
@@ -39,7 +39,7 @@ int PTable::ExecUpdate(char *filename)
         bmsem->V();
         return -1;
     }
-    if (strcmp(filename, "./test/shell") == 0) // Compare program name and currentThread name to make sure this program is not called Exec itself.
+    if (strcmp(filename, kernel->pTab->GetFileName(kernel->currentThread->processID)) == 0) // Compare program name and currentThread name to make sure this program is not called Exec itself.
     {
         printf("PTable::ExecUpdate Error -- Can't execute itself\n");
         bmsem->V();

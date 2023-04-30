@@ -36,6 +36,6 @@ public:
     char *GetFileName();           // Return the process name
 };
 
-void StartProcess(int *id); // Used to start the process
+void StartProcess(void *id); // Used to start the process
 
 #endif

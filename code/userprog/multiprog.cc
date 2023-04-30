@@ -27,10 +27,10 @@ void SyscallExec()
     delete executable;
 
     //  Create a new process using pTab ExecUpdate to execute the program
-    kernel->pTab->ExecUpdate(progname);
+    int pid = kernel->pTab->ExecUpdate(progname);
 
-    DEBUG(dbgSys, "Successful create file '" << progname << "'\n");
-    kernel->machine->WriteRegister(2, (int)0); // trả về cho chương trình
+    DEBUG(dbgSys, "Successful exec file '" << progname << "'\n");
+    kernel->machine->WriteRegister(2, pid); // trả về cho chương trình
     // người dùng thành công
     delete progname;
 
