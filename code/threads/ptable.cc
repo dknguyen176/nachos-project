@@ -7,6 +7,11 @@ PTable::PTable(int size)
     bmsem = new Semaphore("bmsem", 1);
     for (int i = 0; i < size; i++)
         pcb[i] = NULL;
+
+    bm->Mark(0);
+    pcb[0] = new PCB(0);
+    pcb[0]->parentID = -1;
+    pcb[0]->SetFileName("./test/shell"); // The first process will run the shell
 }
 
 PTable::~PTable()
@@ -20,17 +25,41 @@ PTable::~PTable()
 
 int PTable::ExecUpdate(char *filename)
 {
-    bmsem->P();
-    int pid = GetFreeSlot();
-    if (pid == -1)
+    bmsem->P();           // Avoid loading 2 processes at the same time.
+    if (filename == NULL) // Check the validity of the program "name".
     {
+        printf("PTable::ExecUpdate Error -- File name is NULL\n");
         bmsem->V();
         return -1;
     }
-    pcb[pid] = new PCB(pid);
-    bm->Mark(pid);
+    if (kernel->fileSystem->Open(filename) == NULL) // Check the existence of the program "name" by calling the Open method of FileSystem class.
+    {
+        printf("PTable::ExecUpdate Error -- File name is invalid\n");
+        bmsem->V();
+        return -1;
+    }
+    if (strcmp(filename, "./test/shell") == 0) // Compare program name and currentThread name to make sure this program is not called Exec itself.
+    {
+        printf("PTable::ExecUpdate Error -- Can't execute itself\n");
+        bmsem->V();
+        return -1;
+    }
+
+    int pid = GetFreeSlot(); // Find the empty position in the Ptable table
+    if (pid == -1)
+    {
+        printf("PTable::ExecUpdate Error -- No empty slot\n");
+        bmsem->V();
+        return -1;
+    }
+
+    pcb[pid] = new PCB(pid); // create a new PCB with processID being the index of this slot
+    pcb[pid]->SetFileName(filename);
+    pcb[pid]->parentID = kernel->currentThread->processID; // parentID is processID of currentThread
+    bm->Mark(pid);                                         // Mark used.
+    pcb[pid]->Exec(filename, pid);                         // Call the method Exec of PCB class
     bmsem->V();
-    pcb[pid]->Exec(filename, pid);
+
     return pid;
 }
 

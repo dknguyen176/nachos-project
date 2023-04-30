@@ -5,10 +5,16 @@
 
 PCB::PCB(int id)
 {
+    if (!id)
+        parentID = -1;
+    else
+        parentID = kernel->currentThread->processID;
+
     pid = id;
     joinsem = new Semaphore("joinsem", 0);
     exitsem = new Semaphore("exitsem", 0);
     mutex = new Semaphore("multex", 1);
+    thread = NULL;
 
     exitcode = 0;
     numwait = 0;
@@ -86,31 +92,27 @@ int PCB::Exec(char *filename, int pid)
     thread = new Thread(filename);
     if (thread == NULL)
     {
-        printf("Not enough memory\n");
+        printf("PCB::Exec Error -- Not enough memory\n");
         mutex->V();
         return -1;
     }
-    thread->processID = pid;                                  // Set processID of this thread is id.
-    parentID = kernel->currentThread->processID;              // Set the parentID of this thread to be the processID of the thread calling Exec
-    thread->Fork((VoidFunctionPtr)StartProcess, (void *)pid); // Fork a thread to run StartProcess
+    thread->processID = pid;                                   // Set processID of this thread to id.
+    parentID = kernel->currentThread->processID;               // Set the parentID of this thread to be the processID of the thread calling Exec
+    thread->Fork((VoidFunctionPtr)StartProcess, (void *)&pid); // Fork a thread to run StartProcess
     mutex->V();
 }
 
-void StartProcess(int *pid)
+void StartProcess(int *id)
 {
-    // TODO: Sua cai AddrSpace cua moi process
-    /*
-    int id = *pid;
-    AddrSpace *space = new AddrSpace(id);
-    if (space == NULL)
+    // Use load and run to load the executable file into the address space of the current thread
+    int pid = *id;
+    char *filename = kernel->pTab->GetFileName(pid);
+    AddrSpace *space = new AddrSpace();
+    if (!space->Load(filename))
     {
-        printf("Not enough memory\n");
+        printf("\nError loading executable\n");
         return;
     }
-    kernel->currentThread->space = space;
-    space->InitRegisters();
-    space->RestoreState();
-    kernel->machine->Run();
-    ASSERTNOTREACHED();
-    */
+    space->Execute();
+    kernel->currentThread->Finish();
 }

@@ -204,6 +204,16 @@ void Lock::Release()
 }
 
 //----------------------------------------------------------------------
+// Lock::IsHeldByCurrentThread
+// Returns true if the current thread holds this lock.
+//---------------------------------------------------------------------
+
+bool Lock::IsHeldByCurrentThread()
+{
+    return lockHolder == kernel->currentThread;
+}
+
+//----------------------------------------------------------------------
 // Condition::Condition
 // 	Initialize a condition variable, so that it can be
 //	used for synchronization.  Initially, no one is waiting

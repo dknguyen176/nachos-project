@@ -15,6 +15,7 @@ private:
     PCB *pcb[MAX_PROCESS];
     Semaphore *bmsem; // used to prevent the case of loading 2 processes at the same time public :
     // Constructor initialize the size of the PCB object to store the process size. Set the initial value to null
+public:
     PTable(int size);
     ~PTable();                 // Destructor
     int ExecUpdate(char *);    // Process the syscall SC_Exec

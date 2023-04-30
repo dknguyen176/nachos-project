@@ -61,10 +61,11 @@ public:
   FileSystem *fileSystem;
   PostOfficeInput *postOfficeIn;
   PostOfficeOutput *postOfficeOut;
-  Semaphore *addrLock;
-  Bitmap *gPhysPageBitMap;
-  STable *semTab;
-  PTable *pTab;
+
+  Semaphore *addrLock;     // lock for address space
+  Bitmap *gPhysPageBitMap; // global physical page bitmap
+  STable *semTab;          // semaphore table
+  PTable *pTab;            // process table
 
   int hostName; // machine identifier
 

@@ -13,7 +13,7 @@ private:
     int pid;           // The process ID
     char filename[50]; // The process name
     int numwait;       // the number of join process
-    Thread *thread;    // the thread which is used to implement join and exit
+    Thread *thread;    // the thread for this process
 public:
     int parentID; // The parent process’s ID
     PCB(int id);  // Constructor
@@ -34,6 +34,6 @@ public:
     char *GetFileName();           // Return the process name
 };
 
-void StartProcess_2(int *pid); // Used to start the process
+void StartProcess(int *id); // Used to start the process
 
 #endif
