@@ -38,5 +38,7 @@ extern void SyscallReceiveSocket();
 
 // Multiprogramming exception handler
 extern void SyscallExec();
+extern void SyscallJoin();
+extern void SyscallExit();
 
 #endif // EXCEPTION_UTILITY_H

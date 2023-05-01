@@ -67,20 +67,49 @@ int PTable::ExecUpdate(char *filename)
 int PTable::ExitUpdate(int ec)
 {
     int pid = kernel->currentThread->processID;
-    pcb[pid]->SetExitCode(ec);
-    pcb[pid]->ExitRelease();
-    pcb[pid]->JoinRelease();
+
+    if (pid == 0) // If the currentThread is the first process, then halt the machine
+    {
+        printf("Machine halting!\n");
+        kernel->interrupt->Halt();
+        return 0;
+    }
+
+    if (!IsExist(pid)) // Check the validity of the processID
+    {
+        printf("PTable::ExitUpdate Error -- Process %d does not exist\n", pid);
+        return -1;
+    }
+
+    int parentID = pcb[pid]->parentID;
+    pcb[pid]->SetExitCode(ec);    // Set exit code for the currentThread
+    pcb[parentID]->DecNumWait();  // Decrement numwait
+    pcb[parentID]->JoinRelease(); // Release the parent process, which called JoinWait()
+    pcb[pid]->ExitWait();         // Wait until the parent process calls ExitRelease()
+
     Remove(pid);
-    return 0;
+    return ec;
 }
 
 int PTable::JoinUpdate(int id)
 {
-    if (!IsExist(id))
+    if (!IsExist(id)) // Check the validity of the processID
+    {
+        printf("PTable::JoinUpdate Error -- Process %d does not exist\n", id);
         return -1;
-    pcb[id]->JoinWait();
-    int ec = pcb[id]->GetExitCode();
-    pcb[id]->JoinRelease();
+    }
+    if (pcb[id]->parentID != kernel->currentThread->processID) // Check if the processID is the child of the currentThread
+    {
+        printf("PTable::JoinUpdate Error -- Process %d is not the child of currentThread\n", id);
+        return -1;
+    }
+    int parentID = pcb[id]->parentID;
+
+    pcb[parentID]->IncNumWait();     // Increment numwait
+    pcb[parentID]->JoinWait();       // Wait for the child process to execute.
+    int ec = pcb[id]->GetExitCode(); // Get the exit code of the child process
+    pcb[id]->ExitRelease();          // Release the child process
+
     return ec;
 }
 

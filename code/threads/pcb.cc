@@ -39,22 +39,22 @@ int PCB::GetNumWait()
 
 void PCB::JoinWait()
 {
-    joinsem->P();
+    joinsem->P(); // switch to block state and stop, and wait for JoinRelease to continue
 }
 
-void PCB::ExitWait()
+void PCB::ExitWait() // switch to block state and stop, and wait for ExitRelease to continue
 {
     exitsem->P();
 }
 
-void PCB::JoinRelease()
+void PCB::JoinRelease() // release the waiting process, which called JoinWait()
 {
     joinsem->V();
 }
 
 void PCB::ExitRelease()
 {
-    exitsem->V();
+    exitsem->V(); // release the waiting process
 }
 
 void PCB::IncNumWait()

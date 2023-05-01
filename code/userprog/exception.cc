@@ -141,6 +141,14 @@ void ExceptionHandler(ExceptionType which)
 			SyscallExec();
 			return;
 
+		case SC_Join:
+			SyscallJoin();
+			return;
+
+		case SC_Exit:
+			SyscallExit();
+			return;
+
 		default:
 			cerr << "Unexpected system call " << type << "\n";
 			recoverPC();
