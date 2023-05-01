@@ -27,14 +27,15 @@ int main()
     while (1)
     {
         Write(prompt, 2, output);
-
         Read(buffer, 60, input);
-
         newProc = Exec(buffer);
-        Join(newProc);
 
-        len = _strcpy(msg, "Program exited\n");
-        Write(msg, len, output);
+        if (newProc == -1)
+        {
+            len = _strcpy(msg, "Error, executable not found.\n");
+            Write(msg, len, output);
+        }
+        else
+            Join(newProc);
     }
-    Exit(0);
 }

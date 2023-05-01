@@ -22,11 +22,15 @@ PCB::PCB(int id)
 
 PCB::~PCB()
 {
-    delete joinsem;
-    delete exitsem;
-    delete mutex;
+    if (joinsem != NULL)
+        delete joinsem;
+    if (exitsem != NULL)
+        delete exitsem;
+    if (mutex != NULL)
+        delete mutex;
 
-    thread->Finish();
+    if (thread != NULL)
+        thread->Finish();
 }
 
 int PCB::GetID()
@@ -61,12 +65,17 @@ void PCB::ExitRelease()
 
 void PCB::IncNumWait()
 {
+    mutex->P();
     numwait++;
+    mutex->V();
 }
 
 void PCB::DecNumWait()
 {
-    numwait--;
+    mutex->P();
+    if (numwait > 0)
+        numwait--;
+    mutex->V();
 }
 
 int PCB::GetExitCode()
@@ -119,5 +128,5 @@ void StartProcess(void *id)
         return;
     }
     space->Execute();
-    kernel->currentThread->Finish();
+    ASSERTNOTREACHED();
 }

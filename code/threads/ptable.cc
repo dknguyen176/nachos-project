@@ -70,7 +70,6 @@ int PTable::ExitUpdate(int ec)
 
     if (pid == 0) // If the currentThread is the first process, then halt the machine
     {
-        printf("Machine halting!\n");
         kernel->interrupt->Halt();
         return 0;
     }
@@ -85,7 +84,8 @@ int PTable::ExitUpdate(int ec)
     pcb[pid]->SetExitCode(ec);    // Set exit code for the currentThread
     pcb[parentID]->DecNumWait();  // Decrement numwait
     pcb[parentID]->JoinRelease(); // Release the parent process, which called JoinWait()
-    pcb[pid]->ExitWait();         // Wait until the parent process calls ExitRelease()
+
+    pcb[pid]->ExitWait(); // Wait until the parent process calls ExitRelease()
 
     Remove(pid);
     return ec;
@@ -129,14 +129,11 @@ bool PTable::IsExist(int pid)
 
 void PTable::Remove(int pid)
 {
-    bmsem->P();
     if (IsExist(pid))
     {
         bm->Clear(pid);
         delete pcb[pid];
-        pcb[pid] = NULL;
     }
-    bmsem->V();
 }
 
 char *PTable::GetFileName(int id)
