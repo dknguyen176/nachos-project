@@ -25,6 +25,8 @@ PCB::~PCB()
     delete joinsem;
     delete exitsem;
     delete mutex;
+
+    thread->Finish();
 }
 
 int PCB::GetID()

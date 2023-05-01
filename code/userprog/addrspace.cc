@@ -101,7 +101,7 @@ bool AddrSpace::Load(char *fileName)
 {
     OpenFile *executable = kernel->fileSystem->Open(fileName);
     NoffHeader noffH;
-    unsigned int size;
+    unsigned int i, size;
 
     if (executable == NULL)
     {
@@ -148,7 +148,7 @@ bool AddrSpace::Load(char *fileName)
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
     pageTable = new TranslationEntry[numPages];
-    for (int i = 0; i < numPages; i++)
+    for (i = 0; i < numPages; i++)
     {
         // pageTable[i].virtualPage = i; // for now, virt page # = phys page #
         // MODIFIED: now virtualPage will need to find the available page on physical using gPhysPageBitMap
@@ -158,10 +158,9 @@ bool AddrSpace::Load(char *fileName)
         pageTable[i].use = FALSE;
         pageTable[i].dirty = FALSE;
         pageTable[i].readOnly = FALSE;
-    }
 
-    // zero out the entire address space
-    bzero(kernel->machine->mainMemory, size);
+        bzero(&kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize], PageSize); // zero out the physical memory
+    }
 
     kernel->addrLock->V();
 
@@ -170,124 +169,30 @@ bool AddrSpace::Load(char *fileName)
     // MODIFIED: now virtual address is mapped to physical address
     if (noffH.code.size > 0)
     {
-        DEBUG(dbgAddr, "Initializing code segment.");
-        DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
-
-        /*
-        executable->ReadAt(
-            &(kernel->machine->mainMemory[noffH.code.virtualAddr]),
-            noffH.code.size, noffH.code.inFileAddr);
-        */
-
-        // for each page in code segment
-        // copy the page from executable to physical memory
-
-        int codeSize = noffH.code.size;                                              // remaining size of the code segment
-        int codePageStart = noffH.code.virtualAddr / PageSize;                       // the first page of the code segment
-        int codePageEnd = (noffH.code.virtualAddr + noffH.code.size - 1) / PageSize; // the last page of the code segment
-
-        for (int i = codePageStart; i <= codePageEnd; i++)
-        {
-            int physicalAddr = pageTable[i].physicalPage * PageSize;
-            int virtualAddr = i * PageSize;
-            int copySize = PageSize;
-
-            if (i == codePageStart)
-            {
-                copySize = PageSize - (noffH.code.virtualAddr % PageSize); // read only the remaining size of the page
-            }
-            else if (i == codePageEnd)
-            {
-                copySize = codeSize % PageSize; // read only the first size of the page
-            }
-
+        for (i = 0; i < numPages; i++)
             executable->ReadAt(
-                &(kernel->machine->mainMemory[physicalAddr]),
-                copySize, noffH.code.inFileAddr + virtualAddr - noffH.code.virtualAddr);
-
-            codeSize -= copySize;
-        }
+                &(kernel->machine->mainMemory[noffH.code.virtualAddr]) +
+                    (pageTable[i].physicalPage * PageSize),
+                PageSize, noffH.code.inFileAddr + (i * PageSize));
     }
+
     if (noffH.initData.size > 0)
     {
-        DEBUG(dbgAddr, "Initializing data segment.");
-        DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
-
-        /*
-        executable->ReadAt(
-            &(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
-            noffH.initData.size, noffH.initData.inFileAddr);
-        */
-
-        // for each page in data segment
-        // copy the page from executable to physical memory
-
-        int dataSize = noffH.initData.size;                                                  // remaining size of the data segment
-        int dataPageStart = noffH.initData.virtualAddr / PageSize;                           // the first page of the data segment
-        int dataPageEnd = (noffH.initData.virtualAddr + noffH.initData.size - 1) / PageSize; // the last page of the data segment
-
-        for (int i = dataPageStart; i <= dataPageEnd; i++)
-        {
-            int physicalAddr = pageTable[i].physicalPage * PageSize;
-            int virtualAddr = i * PageSize;
-            int copySize = PageSize;
-
-            if (i == dataPageStart)
-            {
-                copySize = PageSize - (noffH.initData.virtualAddr % PageSize); // read only the remaining size of the page
-            }
-            else if (i == dataPageEnd)
-            {
-                copySize = dataSize % PageSize; // read only the first size of the page
-            }
-
+        for (i = 0; i < numPages; i++)
             executable->ReadAt(
-                &(kernel->machine->mainMemory[physicalAddr]),
-                copySize, noffH.initData.inFileAddr + virtualAddr - noffH.initData.virtualAddr);
-
-            dataSize -= copySize;
-        }
+                &(kernel->machine->mainMemory[noffH.initData.virtualAddr]) +
+                    (pageTable[i].physicalPage * PageSize),
+                PageSize, noffH.initData.inFileAddr + (i * PageSize));
     }
 
 #ifdef RDATA
     if (noffH.readonlyData.size > 0)
     {
-        DEBUG(dbgAddr, "Initializing read only data segment.");
-        DEBUG(dbgAddr, noffH.readonlyData.virtualAddr << ", " << noffH.readonlyData.size);
-        /*
-        executable->ReadAt(
-            &(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]),
-            noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
-        */
-
-        // for each page in read only data segment
-        // copy the page from executable to physical memory
-
-        int rdataSize = noffH.readonlyData.size;                                                      // remaining size of the read only data segment
-        int rdataPageStart = noffH.readonlyData.virtualAddr / PageSize;                               // the first page of the read only data segment
-        int rdataPageEnd = (noffH.readonlyData.virtualAddr + noffH.readonlyData.size - 1) / PageSize; // the last page of the read only data segment
-
-        for (int i = rdataPageStart; i <= rdataPageEnd; i++)
-        {
-            int physicalAddr = pageTable[i].physicalPage * PageSize;
-            int virtualAddr = i * PageSize;
-            int copySize = PageSize;
-
-            if (i == rdataPageStart)
-            {
-                copySize = PageSize - (noffH.readonlyData.virtualAddr % PageSize); // read only the remaining size of the page
-            }
-            else if (i == rdataPageEnd)
-            {
-                copySize = rdataSize % PageSize; // read only the first size of the page
-            }
-
+        for (i = 0; i < numPages; i++)
             executable->ReadAt(
-                &(kernel->machine->mainMemory[physicalAddr]),
-                copySize, noffH.readonlyData.inFileAddr + virtualAddr - noffH.readonlyData.virtualAddr);
-
-            rdataSize -= copySize;
-        }
+                &(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]) +
+                    (pageTable[i].physicalPage * PageSize),
+                PageSize, noffH.readonlyData.inFileAddr + (i * PageSize));
     }
 #endif
 
