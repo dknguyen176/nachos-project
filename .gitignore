@@ -1,8 +1,16 @@
-.vscode
-*.o
-DISK_0
+# vscode
+.vscode/*
+!.vscode/c_cpp_properties.json
+
+# build files
 code/build.linux/nachos
 coff2noff/coff2noff.x86Linux
+
+# test files
 code/test/*
 !code/test/*.c
 !code/test/*.S
+
+# misc
+*.o
+DISK_0

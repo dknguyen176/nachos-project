@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/code/userprog/"
+            ],
+            "defines": ["FILESYS_STUB"]
+        }
+    ],
+    "version": 4
+}
