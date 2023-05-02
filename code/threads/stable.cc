@@ -6,43 +6,41 @@ Sem::Sem(char *na, int i)
     strcpy(this->name, na);
     sem = new Semaphore(this->name, i);
 }
+
 Sem::~Sem() // Destruct the Sem object
 {
     if (sem)
         delete sem;
 }
-void Sem::wait()
-{
-    sem->P(); // Conduct the waiting function
-}
-void Sem::signal()
-{
-    sem->V(); // Release semaphore
-}
-char *Sem::GetName() // Return the semaphore name
-{
-    return this->name;
-}
+
+void Sem::wait() { sem->P(); } // Conduct the waiting function
+
+void Sem::signal() { sem->V(); } // Release semaphore
+
+char *Sem::GetName() { return this->name; } // Return the semaphore name
 
 STable::STable()
 {
     bm = new Bitmap(MAX_SEMAPHORE);
 }
+
 STable::~STable()
 {
     if (bm)
         delete bm;
 }
+
 int STable::Create(char *name, int init)
 {
     if (Find(name) != -1)
         return -1;
-    int id = FindFreeSlot();
+    int id = FindFreeSlotAndSet();
     if (id == -1)
         return -1;
     semTab[id] = new Sem(name, init);
     return 0;
 }
+
 int STable::Wait(char *name)
 {
     int id = Find(name);
@@ -51,6 +49,7 @@ int STable::Wait(char *name)
     semTab[id]->wait();
     return 0;
 }
+
 int STable::Signal(char *name)
 {
     int id = Find(name);
@@ -59,6 +58,7 @@ int STable::Signal(char *name)
     semTab[id]->signal();
     return 0;
 }
+
 int STable::Find(char *name) // Find the semaphore name
 {
     for (int i = 0; i < MAX_SEMAPHORE; i++)
@@ -66,7 +66,7 @@ int STable::Find(char *name) // Find the semaphore name
             return i;
     return -1;
 }
-int STable::FindFreeSlot() // Find an empty slot
-{
-    return bm->Find();
-}
+
+int STable::FindFreeSlot() { return bm->Find(); } // Find an empty slot
+
+int STable::FindFreeSlotAndSet() { return bm->FindAndSet(); } // Find an empty slot and set it to be used

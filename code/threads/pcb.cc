@@ -5,15 +5,10 @@
 
 PCB::PCB(int id)
 {
-    if (!id)
-        parentID = -1;
-    else
-        parentID = kernel->currentThread->processID;
-
     pid = id;
     joinsem = new Semaphore("joinsem", 0);
     exitsem = new Semaphore("exitsem", 0);
-    mutex = new Semaphore("multex", 1);
+    mutex = new Semaphore("mutex", 1);
     thread = NULL;
 
     exitcode = 0;
@@ -33,70 +28,6 @@ PCB::~PCB()
         thread->Finish();
 }
 
-int PCB::GetID()
-{
-    return pid;
-}
-
-int PCB::GetNumWait()
-{
-    return numwait;
-}
-
-void PCB::JoinWait()
-{
-    joinsem->P(); // switch to block state and stop, and wait for JoinRelease to continue
-}
-
-void PCB::ExitWait() // switch to block state and stop, and wait for ExitRelease to continue
-{
-    exitsem->P();
-}
-
-void PCB::JoinRelease() // release the waiting process, which called JoinWait()
-{
-    joinsem->V();
-}
-
-void PCB::ExitRelease()
-{
-    exitsem->V(); // release the waiting process
-}
-
-void PCB::IncNumWait()
-{
-    mutex->P();
-    numwait++;
-    mutex->V();
-}
-
-void PCB::DecNumWait()
-{
-    mutex->P();
-    if (numwait > 0)
-        numwait--;
-    mutex->V();
-}
-
-int PCB::GetExitCode()
-{
-    return exitcode;
-}
-
-void PCB::SetExitCode(int ec)
-{
-    exitcode = ec;
-}
-
-void PCB::SetFileName(char *fn)
-{
-    strcpy(filename, fn);
-}
-
-char *PCB::GetFileName()
-{
-    return filename;
-}
 int PCB::Exec(char *filename, int pid)
 {
     mutex->P(); // Call mutex->P() to help avoid loading 2 processes at the same time
@@ -130,3 +61,42 @@ void StartProcess(void *id)
     space->Execute();
     ASSERTNOTREACHED();
 }
+
+void PCB::JoinWait() { joinsem->P(); } // switch to block state and stop, and wait for JoinRelease to continue
+
+void PCB::ExitWait() { exitsem->P(); } // switch to block state and stop, and wait for ExitRelease to continue
+
+void PCB::JoinRelease() { joinsem->V(); } // release the waiting process, which called JoinWait()
+
+void PCB::ExitRelease() { exitsem->V(); } // release the waiting process
+
+void PCB::IncNumWait()
+{
+    mutex->P();
+    numwait++;
+    mutex->V();
+}
+
+void PCB::DecNumWait()
+{
+    mutex->P();
+    if (numwait > 0)
+        numwait--;
+    mutex->V();
+}
+
+void PCB::SetExitCode(int ec) { exitcode = ec; }
+
+void PCB::SetParentID(int ppid) { parentID = ppid; }
+
+void PCB::SetFileName(char *fn) { strcpy(filename, fn); }
+
+int PCB::GetID() { return pid; }
+
+int PCB::GetParentID() { return parentID; }
+
+int PCB::GetNumWait() { return numwait; }
+
+int PCB::GetExitCode() { return exitcode; }
+
+char *PCB::GetFileName() { return filename; }

@@ -260,7 +260,9 @@ void Thread::Sleep(bool finishing)
 //----------------------------------------------------------------------
 
 static void ThreadFinish() { kernel->currentThread->Finish(); }
+
 static void ThreadBegin() { kernel->currentThread->Begin(); }
+
 void ThreadPrint(Thread *t) { t->Print(); }
 
 #ifdef PARISC

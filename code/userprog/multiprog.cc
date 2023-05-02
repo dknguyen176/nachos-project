@@ -1,10 +1,11 @@
 #include "exhandler.h"
+#include "constant.h"
 
 void SyscallExec()
 {
     DEBUG(dbgSys, "SC_Exec call ...\n");
 
-    char *progname = readChars(4, MAXFILELENGTH);
+    char *progname = readChars(4, MAX_FILENAME_LENGTH);
     if (!progname)
     {
         recoverPC();

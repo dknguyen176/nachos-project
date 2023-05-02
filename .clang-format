@@ -5,3 +5,5 @@ AccessModifierOffset: -4
 ColumnLimit: 0
 UseCRLF: false
 SortIncludes: false
+SeparateDefinitionBlocks: Always
+AllowShortFunctionsOnASingleLine: All

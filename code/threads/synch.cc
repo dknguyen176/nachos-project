@@ -123,6 +123,7 @@ void Semaphore::V()
 //----------------------------------------------------------------------
 
 static Semaphore *ping;
+
 static void
 SelfTestHelper(Semaphore *pong)
 {

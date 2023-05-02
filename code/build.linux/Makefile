@@ -227,7 +227,8 @@ LIB_H = ../lib/bitmap.h\
 	../lib/libtest.h\
 	../lib/list.h\
 	../lib/sysdep.h\
-	../lib/utility.h
+	../lib/utility.h\
+	../lib/constant.h
 
 LIB_C = ../lib/bitmap.cc\
 	../lib/debug.cc\

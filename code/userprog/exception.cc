@@ -47,121 +47,123 @@
 
 void ExceptionHandler(ExceptionType which)
 {
-	int type = kernel->machine->ReadRegister(2);
+    int type = kernel->machine->ReadRegister(2);
 
-	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
+    DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
-	switch (which)
-	{
-	case SyscallException:
-		switch (type)
-		{
-		case SC_Halt:
-		{
-			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
+    switch (which)
+    {
+    case SyscallException:
+        switch (type)
+        {
+        case SC_Halt: {
+            DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 
-			SysHalt();
+            SysHalt();
 
-			ASSERTNOTREACHED();
-			break;
-		}
+            ASSERTNOTREACHED();
+            break;
+        }
 
-		case SC_Add:
-		{
-			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
+        case SC_Add: {
+            DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 
-			/* Process SysAdd Systemcall*/
-			int result;
-			result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-							/* int op2 */ (int)kernel->machine->ReadRegister(5));
+            /* Process SysAdd Systemcall*/
+            int result;
+            result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
+                            /* int op2 */ (int)kernel->machine->ReadRegister(5));
 
-			DEBUG(dbgSys, "Add returning with " << result << "\n");
-			/* Prepare Result */
-			kernel->machine->WriteRegister(2, (int)result);
+            DEBUG(dbgSys, "Add returning with " << result << "\n");
+            /* Prepare Result */
+            kernel->machine->WriteRegister(2, (int)result);
 
-			/* Modify return point */
-			recoverPC();
+            /* Modify return point */
+            recoverPC();
 
-			return;
+            return;
 
-			ASSERTNOTREACHED();
+            ASSERTNOTREACHED();
 
-			break;
-		}
+            break;
+        }
 
-		case SC_Create:
-			SyscallCreateFile();
-			return;
+        case SC_PrintInt:
+            SyscallPrintInt();
+            return;
 
-		case SC_Open:
-			SyscallOpenFile();
-			return;
+        case SC_Create:
+            SyscallCreateFile();
+            return;
 
-		case SC_Close:
-			SyscallCloseFile();
-			return;
+        case SC_Open:
+            SyscallOpenFile();
+            return;
 
-		case SC_Read:
-			SyscallReadFile();
-			return;
+        case SC_Close:
+            SyscallCloseFile();
+            return;
 
-		case SC_Write:
-			SyscallWriteFile();
-			return;
+        case SC_Read:
+            SyscallReadFile();
+            return;
 
-		case SC_Seek:
-			SyscallSeekFile();
-			return;
+        case SC_Write:
+            SyscallWriteFile();
+            return;
 
-		case SC_Remove:
-			SyscallRemoveFile();
-			return;
+        case SC_Seek:
+            SyscallSeekFile();
+            return;
 
-		case SC_OpenSocket:
-			SyscallOpenSocket();
-			return;
+        case SC_Remove:
+            SyscallRemoveFile();
+            return;
 
-		case SC_Connect:
-			SyscallConnectSocket();
-			return;
+        case SC_OpenSocket:
+            SyscallOpenSocket();
+            return;
 
-		case SC_CloseSocket:
-			SyscallCloseSocket();
-			return;
+        case SC_Connect:
+            SyscallConnectSocket();
+            return;
 
-		case SC_Send:
-			SyscallSendSocket();
-			return;
+        case SC_CloseSocket:
+            SyscallCloseSocket();
+            return;
 
-		case SC_Receive:
-			SyscallReceiveSocket();
-			return;
+        case SC_Send:
+            SyscallSendSocket();
+            return;
 
-		case SC_Exec:
-			SyscallExec();
-			return;
+        case SC_Receive:
+            SyscallReceiveSocket();
+            return;
 
-		case SC_Join:
-			SyscallJoin();
-			return;
+        case SC_Exec:
+            SyscallExec();
+            return;
 
-		case SC_Exit:
-			SyscallExit();
-			return;
+        case SC_Join:
+            SyscallJoin();
+            return;
 
-		default:
-			cerr << "Unexpected system call " << type << "\n";
-			recoverPC();
-			return;
-		}
+        case SC_Exit:
+            SyscallExit();
+            return;
 
-		return;
+        default:
+            cerr << "Unexpected system call " << type << "\n";
+            recoverPC();
+            return;
+        }
 
-	default:
-		cerr << "Unexpected user mode exception" << (int)which << "\n";
-		recoverPC();
-		return;
-	}
+        return;
 
-	ASSERTNOTREACHED();
+    default:
+        cerr << "Unexpected user mode exception" << (int)which << "\n";
+        recoverPC();
+        return;
+    }
+
+    ASSERTNOTREACHED();
 }

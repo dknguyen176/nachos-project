@@ -6,7 +6,7 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/code/userprog/"
             ],
-            "defines": ["FILESYS_STUB"]
+            "defines": ["FILESYS_STUB", "x86"]
         }
     ],
     "version": 4

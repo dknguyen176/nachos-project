@@ -12,28 +12,35 @@ private:
     Semaphore *exitsem; // semaphore for exit process
     Semaphore *mutex;   // exclusive access semaphore
     int exitcode;
+    int numwait; // the number of join process
+
     int pid;           // The process ID
+    int parentID;      // The parent process’s ID
     char filename[50]; // The process name
-    int numwait;       // the number of join process
     Thread *thread;    // the thread for this process
+
 public:
-    int parentID; // The parent process’s ID
-    PCB(int id);  // Constructor
-    ~PCB();       // Destructor
+    PCB(int id); // Constructor
+    ~PCB();      // Destructor
+
     // Load the program has the name is “filename” and the process id is pid
     int Exec(char *name, int pid); // Create a thread with the name is filename and the process id is pid
-    int GetID();                   // Return the PID of the current process
-    int GetNumWait();              // Return the number of the waiting process
     void JoinWait();               // The parent process wait for the child process finishes
     void ExitWait();               // The child process finishes
     void JoinRelease();            // The child process notice the parent process
     void ExitRelease();            // The parent process accept to exit the child process
     void IncNumWait();             // Increase the number of the waiting process
     void DecNumWait();             // Decrease the number of the waiting process
-    void SetExitCode(int);         // Set the exit code for the process
-    int GetExitCode();             // Return the exitcode
-    void SetFileName(char *);      // Set the process name
-    char *GetFileName();           // Return the process name
+
+    // Set-Get Methods
+    void SetExitCode(int);    // Set the exit code for the process
+    void SetParentID(int);    // Set the parent process ID
+    void SetFileName(char *); // Set the process name
+    int GetID();              // Return the PID of the current process
+    int GetNumWait();         // Return the number of the waiting process
+    int GetExitCode();        // Return the exitcode
+    int GetParentID();        // Return the parent process ID
+    char *GetFileName();      // Return the process name
 };
 
 void StartProcess(void *id); // Used to start the process

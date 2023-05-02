@@ -40,19 +40,20 @@
 class Semaphore
 {
 public:
-  Semaphore(char *debugName, int initialValue); // set initial value
-  ~Semaphore();                                 // de-allocate semaphore
-  char *getName() { return name; }              // debugging assist
+    Semaphore(char *debugName, int initialValue); // set initial value
+    ~Semaphore();                                 // de-allocate semaphore
 
-  void P();        // these are the only operations on a semaphore
-  void V();        // they are both *atomic*
-  void SelfTest(); // test routine for semaphore implementation
+    char *getName() { return name; } // debugging assist
+
+    void P();        // these are the only operations on a semaphore
+    void V();        // they are both *atomic*
+    void SelfTest(); // test routine for semaphore implementation
 
 private:
-  char *name; // useful for debugging
-  int value;  // semaphore value, always >= 0
-  List<Thread *> *queue;
-  // threads waiting in P() for the value to be > 0
+    char *name; // useful for debugging
+    int value;  // semaphore value, always >= 0
+    List<Thread *> *queue;
+    // threads waiting in P() for the value to be > 0
 };
 
 // The following class defines a "lock".  A lock can be BUSY or FREE.
@@ -70,23 +71,24 @@ private:
 class Lock
 {
 public:
-  Lock(char *debugName);           // initialize lock to be FREE
-  ~Lock();                         // deallocate lock
-  char *getName() { return name; } // debugging assist
+    Lock(char *debugName); // initialize lock to be FREE
+    ~Lock();               // deallocate lock
 
-  void Acquire(); // these are the only operations on a lock
-  void Release(); // they are both *atomic*
+    char *getName() { return name; } // debugging assist
 
-  bool IsHeldByCurrentThread();
-  // return true if the current thread
-  // holds this lock.
+    void Acquire(); // these are the only operations on a lock
+    void Release(); // they are both *atomic*
 
-  // Note: SelfTest routine provided by SynchList
+    bool IsHeldByCurrentThread();
+    // return true if the current thread
+    // holds this lock.
+
+    // Note: SelfTest routine provided by SynchList
 
 private:
-  char *name;           // debugging assist
-  Thread *lockHolder;   // thread currently holding lock
-  Semaphore *semaphore; // we use a semaphore to implement lock
+    char *name;           // debugging assist
+    Thread *lockHolder;   // thread currently holding lock
+    Semaphore *semaphore; // we use a semaphore to implement lock
 };
 
 // The following class defines a "condition variable".  A condition
@@ -125,22 +127,23 @@ private:
 class Condition
 {
 public:
-  Condition(char *debugName); // initialize condition to
-                              // "no one waiting"
-  ~Condition();               // deallocate the condition
-  char *getName() { return (name); }
+    Condition(char *debugName); // initialize condition to
+                                // "no one waiting"
+    ~Condition();               // deallocate the condition
 
-  void Wait(Lock *conditionLock);      // these are the 3 operations on
-                                       // condition variables; releasing the
-                                       // lock and going to sleep are
-                                       // *atomic* in Wait()
-  void Signal(Lock *conditionLock);    // conditionLock must be held by
-  void Broadcast(Lock *conditionLock); // the currentThread for all of
-                                       // these operations
-  // SelfTest routine provided by SyncLists
+    char *getName() { return (name); }
+
+    void Wait(Lock *conditionLock);      // these are the 3 operations on
+                                         // condition variables; releasing the
+                                         // lock and going to sleep are
+                                         // *atomic* in Wait()
+    void Signal(Lock *conditionLock);    // conditionLock must be held by
+    void Broadcast(Lock *conditionLock); // the currentThread for all of
+                                         // these operations
+                                         // SelfTest routine provided by SyncLists
 
 private:
-  char *name;
-  List<Semaphore *> *waitQueue; // list of waiting threads
+    char *name;
+    List<Semaphore *> *waitQueue; // list of waiting threads
 };
 #endif // SYNCH_H

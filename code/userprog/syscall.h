@@ -43,6 +43,8 @@
 
 #define SC_Add 42
 
+#define SC_PrintInt 64
+
 #define O_RDWR 0
 #define O_RDONLY 1
 #define BUFFER_SIZE 100
@@ -60,13 +62,13 @@
  * from the system call entry point in exception.cc.
  */
 
+/* Print for debug */
+int PrintInt(int i);
+
 /* Stop Nachos, and print out performance stats */
 void Halt();
 
-/*
- * Add the two operants and return the result
- */
-
+/* Add the two operants and return the result */
 int Add(int op1, int op2);
 
 /* Address space control operations: Exit, Exec, Execv, and Join */

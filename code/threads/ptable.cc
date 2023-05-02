@@ -3,6 +3,8 @@
 
 PTable::PTable(int size)
 {
+    ASSERT(size <= MAX_PROCESS);
+
     psize = size;
     bm = new Bitmap(size);
     bmsem = new Semaphore("bmsem", 1);
@@ -11,7 +13,7 @@ PTable::PTable(int size)
 
     bm->Mark(0);
     pcb[0] = new PCB(0);
-    pcb[0]->parentID = -1;
+    pcb[0]->SetParentID(-1);
     pcb[0]->SetFileName("shell"); // The first process will run the shell
 }
 
@@ -21,7 +23,10 @@ PTable::~PTable()
     delete bmsem;
     for (int i = 0; i < psize; i++)
         if (pcb[i] != NULL)
+        {
             delete pcb[i];
+            pcb[i] = NULL;
+        }
 }
 
 int PTable::ExecUpdate(char *filename)
@@ -46,7 +51,7 @@ int PTable::ExecUpdate(char *filename)
         return -1;
     }
 
-    int pid = GetFreeSlot(); // Find the empty position in the Ptable table
+    int pid = GetFreeSlotAndSet(); // Find the empty position in the Ptable table
     if (pid == -1)
     {
         printf("PTable::ExecUpdate Error -- No empty slot\n");
@@ -56,9 +61,8 @@ int PTable::ExecUpdate(char *filename)
 
     pcb[pid] = new PCB(pid); // create a new PCB with processID being the index of this slot
     pcb[pid]->SetFileName(filename);
-    pcb[pid]->parentID = kernel->currentThread->processID; // parentID is processID of currentThread
-    bm->Mark(pid);                                         // Mark used.
-    pcb[pid]->Exec(filename, pid);                         // Call the method Exec of PCB class
+    pcb[pid]->SetParentID(kernel->currentThread->processID); // parentID is processID of currentThread
+    pcb[pid]->Exec(filename, pid);                           // Call the method Exec of PCB class
     bmsem->V();
 
     return pid;
@@ -80,7 +84,7 @@ int PTable::ExitUpdate(int ec)
         return -1;
     }
 
-    int parentID = pcb[pid]->parentID;
+    int parentID = pcb[pid]->GetParentID();
     pcb[pid]->SetExitCode(ec);    // Set exit code for the currentThread
     pcb[parentID]->DecNumWait();  // Decrement numwait
     pcb[parentID]->JoinRelease(); // Release the parent process, which called JoinWait()
@@ -98,13 +102,13 @@ int PTable::JoinUpdate(int id)
         printf("PTable::JoinUpdate Error -- Process %d does not exist\n", id);
         return -1;
     }
-    if (pcb[id]->parentID != kernel->currentThread->processID) // Check if the processID is the child of the currentThread
+    if (pcb[id]->GetParentID() != kernel->currentThread->processID) // Check if the processID is the child of the currentThread
     {
         printf("PTable::JoinUpdate Error -- Process %d is not the child of currentThread\n", id);
         return -1;
     }
-    int parentID = pcb[id]->parentID;
 
+    int parentID = pcb[id]->GetParentID();
     pcb[parentID]->IncNumWait();     // Increment numwait
     pcb[parentID]->JoinWait();       // Wait for the child process to execute.
     int ec = pcb[id]->GetExitCode(); // Get the exit code of the child process
@@ -116,6 +120,11 @@ int PTable::JoinUpdate(int id)
 int PTable::GetFreeSlot()
 {
     return bm->Find();
+}
+
+int PTable::GetFreeSlotAndSet()
+{
+    return bm->FindAndSet();
 }
 
 bool PTable::IsExist(int pid)

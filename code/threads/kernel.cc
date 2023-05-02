@@ -151,6 +151,11 @@ Kernel::~Kernel()
     delete postOfficeIn;
     delete postOfficeOut;
 
+    delete addrLock;
+    delete gPhysPageBitMap;
+    delete semTab;
+    delete pTab;
+
     Exit(0);
 }
 

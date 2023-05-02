@@ -28,54 +28,55 @@ class SynchConsoleInput;
 class SynchConsoleOutput;
 class SynchDisk;
 class Semaphore;
+
 class Kernel
 {
 public:
-  Kernel(int argc, char **argv);
-  // Interpret command line arguments
-  ~Kernel(); // deallocate the kernel
+    Kernel(int argc, char **argv);
+    // Interpret command line arguments
+    ~Kernel(); // deallocate the kernel
 
-  void Initialize(); // initialize the kernel -- separated
-                     // from constructor because
-                     // refers to "kernel" as a global
+    void Initialize(); // initialize the kernel -- separated
+                       // from constructor because
+                       // refers to "kernel" as a global
 
-  void ThreadSelfTest(); // self test of threads and synchronization
+    void ThreadSelfTest(); // self test of threads and synchronization
 
-  void ConsoleTest(); // interactive console self test
+    void ConsoleTest(); // interactive console self test
 
-  void NetworkTest(); // interactive 2-machine network test
+    void NetworkTest(); // interactive 2-machine network test
 
-  // These are public for notational convenience; really,
-  // they're global variables used everywhere.
+    // These are public for notational convenience; really,
+    // they're global variables used everywhere.
 
-  Thread *currentThread; // the thread holding the CPU
-  Scheduler *scheduler;  // the ready list
-  Interrupt *interrupt;  // interrupt status
-  Statistics *stats;     // performance metrics
-  Alarm *alarm;          // the software alarm clock
-  Machine *machine;      // the simulated CPU
-  SynchConsoleInput *synchConsoleIn;
-  SynchConsoleOutput *synchConsoleOut;
-  SynchDisk *synchDisk;
-  FileSystem *fileSystem;
-  PostOfficeInput *postOfficeIn;
-  PostOfficeOutput *postOfficeOut;
+    Thread *currentThread; // the thread holding the CPU
+    Scheduler *scheduler;  // the ready list
+    Interrupt *interrupt;  // interrupt status
+    Statistics *stats;     // performance metrics
+    Alarm *alarm;          // the software alarm clock
+    Machine *machine;      // the simulated CPU
+    SynchConsoleInput *synchConsoleIn;
+    SynchConsoleOutput *synchConsoleOut;
+    SynchDisk *synchDisk;
+    FileSystem *fileSystem;
+    PostOfficeInput *postOfficeIn;
+    PostOfficeOutput *postOfficeOut;
 
-  Semaphore *addrLock;     // lock for address space
-  Bitmap *gPhysPageBitMap; // global physical page bitmap
-  STable *semTab;          // semaphore table
-  PTable *pTab;            // process table
+    Semaphore *addrLock;     // lock for address space
+    Bitmap *gPhysPageBitMap; // global physical page bitmap
+    STable *semTab;          // semaphore table
+    PTable *pTab;            // process table
 
-  int hostName; // machine identifier
+    int hostName; // machine identifier
 
 private:
-  bool randomSlice;   // enable pseudo-random time slicing
-  bool debugUserProg; // single step user program
-  double reliability; // likelihood messages are dropped
-  char *consoleIn;    // file to read console input from
-  char *consoleOut;   // file to send console output to
+    bool randomSlice;   // enable pseudo-random time slicing
+    bool debugUserProg; // single step user program
+    double reliability; // likelihood messages are dropped
+    char *consoleIn;    // file to read console input from
+    char *consoleOut;   // file to send console output to
 #ifndef FILESYS_STUB
-  bool formatFlag; // format the disk if this is true
+    bool formatFlag; // format the disk if this is true
 #endif
 };
 

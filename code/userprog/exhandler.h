@@ -7,8 +7,6 @@
 #include "ksyscall.h"
 #include "debug.h"
 
-#define MAXFILELENGTH 32
-
 // Some helper function
 extern char *User2System(int virtAddr, int limit = -1);
 extern int System2User(int virtAddr, int len, char *buffer);
