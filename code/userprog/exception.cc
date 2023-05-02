@@ -22,6 +22,7 @@
 // of liability and disclaimer of warranty provisions.
 
 #include "exhandler.h"
+
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -53,6 +54,33 @@ void ExceptionHandler(ExceptionType which)
 
     switch (which)
     {
+    // Change the code for other exceptions (not system call exceptions) so that the process can
+    // complete, rather than halting the machine like before
+    // A runtime exception will not cause the operating system to shut down by calling halt()
+    case NoException:
+        return;
+    case PageFaultException:
+        DEBUG(dbgSys, "PageFaultException\n");
+        return;
+    case ReadOnlyException:
+        DEBUG(dbgSys, "ReadOnlyException\n");
+        return;
+    case BusErrorException:
+        DEBUG(dbgSys, "BusErrorException\n");
+        return;
+    case AddressErrorException:
+        DEBUG(dbgSys, "AddressErrorException\n");
+        return;
+    case OverflowException:
+        DEBUG(dbgSys, "OverflowException\n");
+        return;
+    case IllegalInstrException:
+        DEBUG(dbgSys, "IllegalInstrException\n");
+        return;
+    case NumExceptionTypes:
+        DEBUG(dbgSys, "NumExceptionTypes\n");
+        return;
+
     case SyscallException:
         switch (type)
         {
