@@ -59,10 +59,10 @@ int PTable::ExecUpdate(char *filename)
         return -1;
     }
 
-    pcb[pid] = new PCB(pid); // create a new PCB with processID being the index of this slot
-    pcb[pid]->SetFileName(filename);
+    pcb[pid] = new PCB(pid);                                 // create a new PCB with processID being the index of this slot
     pcb[pid]->SetParentID(kernel->currentThread->processID); // parentID is processID of currentThread
-    pcb[pid]->Exec(filename, pid);                           // Call the method Exec of PCB class
+    pcb[pid]->SetFileName(filename);
+    pcb[pid]->Exec(filename, pid); // Call the method Exec of PCB class
     bmsem->V();
 
     return pid;
@@ -142,6 +142,7 @@ void PTable::Remove(int pid)
     {
         bm->Clear(pid);
         delete pcb[pid];
+        pcb[pid] = NULL;
     }
 }
 

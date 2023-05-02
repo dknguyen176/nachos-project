@@ -46,7 +46,9 @@
 
 Semaphore::Semaphore(char *debugName, int initialValue)
 {
-    name = debugName;
+    name = new char[strlen(debugName) + 1];
+    strcpy(name, debugName);
+
     value = initialValue;
     queue = new List<Thread *>;
 }
@@ -59,6 +61,7 @@ Semaphore::Semaphore(char *debugName, int initialValue)
 
 Semaphore::~Semaphore()
 {
+    delete name;
     delete queue;
 }
 

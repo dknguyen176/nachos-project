@@ -16,45 +16,55 @@
 #include "copyright.h"
 #include "filesys.h"
 #include "machine.h"
+#include "noff.h"
 
 #define UserStackSize 1024 // increase this as necessary!
 
 class AddrSpace
 {
 public:
-  AddrSpace();  // Create an address space.
-  ~AddrSpace(); // De-allocate an address space
+    AddrSpace();  // Create an address space.
+    ~AddrSpace(); // De-allocate an address space
 
-  bool Load(char *fileName); // Load a program into addr space from
-                             // a file
-                             // return false if not found
+    bool Allocate(char *filename, unsigned int size); // Initialize an address space
+                                                      // return false if not enough memory
+                                                      // to allocate the address space
 
-  void Execute(); // Run a program
-                  // assumes the program has already
-                  // been loaded
+    bool Load(char *fileName, int argc = 0, char **argv = NULL); // Load a program into addr space from
+                                                                 // a file
+                                                                 // return false if not found
 
-  void ExecuteV(int argc, char **argv); // Run a program with arguments
-                                        // assumes the program has already
-                                        // been loaded
+    void LoadCodeAndData(OpenFile *executable, NoffHeader noffH); // Load code and data segments
+                                                                  // into addr space
+                                                                  // return false if not enough memory
 
-  void PassArgs(int argc, char **argv); // Pass arguments to the program
+    void LoadArguments(int argc, char **argv); // Load arguments into addr space
+                                               // return false if not enough memory
 
-  void SaveState();    // Save/restore address space-specific
-  void RestoreState(); // info on a context switch
+    unsigned int ArgumentSize(int argc, char **argv); // Get size of arguments
 
-  // Translate virtual address _vaddr_
-  // to physical address _paddr_. _mode_
-  // is 0 for Read, 1 for Write.
-  ExceptionType Translate(unsigned int vaddr, unsigned int *paddr, int mode);
+    void Execute(); // Run a program
+                    // assumes the program has already
+                    // been loaded
+
+    void SaveState();    // Save/restore address space-specific
+    void RestoreState(); // info on a context switch
+
+    // Translate virtual address _vaddr_
+    // to physical address _paddr_. _mode_
+    // is 0 for Read, 1 for Write.
+    ExceptionType Translate(unsigned int vaddr, unsigned int *paddr, int mode);
 
 private:
-  TranslationEntry *pageTable; // Assume linear page table translation
-                               // for now!
-  unsigned int numPages;       // Number of pages in the virtual
-                               // address space
+    TranslationEntry *pageTable; // Assume linear page table translation
+                                 // for now!
+    unsigned int numPages;       // Number of pages in the virtual
+                                 // address space
 
-  void InitRegisters(); // Initialize user-level CPU registers,
-                        // before jumping to user code
+    unsigned int argc, argv, stackptr;
+
+    void InitRegisters(); // Initialize user-level CPU registers,
+                          // before jumping to user code
 };
 
 #endif // ADDRSPACE_H

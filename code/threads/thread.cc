@@ -35,7 +35,9 @@ const int STACK_FENCEPOST = 0xdedbeef;
 
 Thread::Thread(char *threadName)
 {
-    name = threadName;
+    name = new char[strlen(threadName) + 1];
+    strcpy(name, threadName);
+
     stackTop = NULL;
     stack = NULL;
     status = JUST_CREATED;
@@ -65,6 +67,10 @@ Thread::~Thread()
     DEBUG(dbgThread, "Deleting thread: " << name);
 
     ASSERT(this != kernel->currentThread);
+
+    delete name;
+    delete space;
+
     if (stack != NULL)
         DeallocBoundedArray((char *)stack, StackSize * sizeof(int));
 }

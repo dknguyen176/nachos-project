@@ -23,13 +23,6 @@ PCB::~PCB()
         delete exitsem;
     if (mutex != NULL)
         delete mutex;
-
-    if (thread != NULL)
-    {
-        thread->Finish();
-        if (thread->space != NULL) // free up the physical memory of the process (by calling ~AddrSpace())
-            delete thread->space;
-    }
 }
 
 int PCB::Exec(char *filename, int pid)

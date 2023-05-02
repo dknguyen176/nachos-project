@@ -22,8 +22,6 @@
 #include "synch.h"
 #include "main.h"
 
-#include "noff.h"
-
 //----------------------------------------------------------------------
 // SwapHeader
 // 	Do little endian to big endian conversion on the bytes in the
@@ -89,6 +87,51 @@ AddrSpace::~AddrSpace()
 }
 
 //----------------------------------------------------------------------
+// AddrSpace::Allocate
+// 	Allocate pages for the stack and data segments
+//----------------------------------------------------------------------
+bool AddrSpace::Allocate(char *filename, unsigned int size)
+{
+    kernel->addrLock->P();
+
+    numPages = divRoundUp(size, PageSize);
+    size = numPages * PageSize;
+
+    /*
+    ASSERT(numPages <= NumPhysPages); // check we're not trying
+                                      // to run anything too big --
+                                      // at least until we have
+                                      // virtual memory
+    */
+
+    if (numPages > kernel->gPhysPageBitMap->NumClear())
+    {
+        printf("Not enough physical memory for %s\n", filename);
+        kernel->addrLock->V();
+        return FALSE;
+    }
+
+    DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
+
+    pageTable = new TranslationEntry[numPages];
+    for (int i = 0; i < numPages; i++)
+    {
+        pageTable[i].virtualPage = i;
+        pageTable[i].physicalPage = kernel->gPhysPageBitMap->FindAndSet();
+        pageTable[i].valid = TRUE;
+        pageTable[i].use = FALSE;
+        pageTable[i].dirty = FALSE;
+        pageTable[i].readOnly = FALSE;
+
+        bzero(&kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize], PageSize); // zero out the physical memory
+    }
+
+    kernel->addrLock->V();
+
+    return TRUE;
+}
+
+//----------------------------------------------------------------------
 // AddrSpace::Load
 // 	Load a user program into memory from a file.
 //
@@ -98,7 +141,7 @@ AddrSpace::~AddrSpace()
 //	"fileName" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
 
-bool AddrSpace::Load(char *fileName)
+bool AddrSpace::Load(char *fileName, int argc, char **argv)
 {
     OpenFile *executable = kernel->fileSystem->Open(fileName);
     NoffHeader noffH;
@@ -116,89 +159,151 @@ bool AddrSpace::Load(char *fileName)
         SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
 
-    kernel->addrLock->P();
 #ifdef RDATA
     // how big is address space?
     size = noffH.code.size + noffH.readonlyData.size + noffH.initData.size +
-           noffH.uninitData.size + UserStackSize;
+           noffH.uninitData.size + UserStackSize + ArgumentSize(argc, argv);
     // we need to increase the size
     // to leave room for the stack
 #else
     // how big is address space?
-    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize; // we need to increase the size
-                                                                                          // to leave room for the stack
+    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + ArgumentSize(argc, argv) + UserStackSize;
 #endif
-    numPages = divRoundUp(size, PageSize);
-    size = numPages * PageSize;
 
-    /*
-    ASSERT(numPages <= NumPhysPages); // check we're not trying
-                                      // to run anything too big --
-                                      // at least until we have
-                                      // virtual memory
-    */
-
-    if (numPages > kernel->gPhysPageBitMap->NumClear())
+    // allocate space for the program
+    if (!Allocate(fileName, size))
     {
-        printf("Not enough physical memory for %s\n", fileName);
         delete executable;
-        kernel->addrLock->V();
         return FALSE;
     }
 
-    DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
-
-    pageTable = new TranslationEntry[numPages];
-    for (i = 0; i < numPages; i++)
-    {
-        // pageTable[i].virtualPage = i; // for now, virt page # = phys page #
-        // MODIFIED: now virtualPage will need to find the available page on physical using gPhysPageBitMap
-        pageTable[i].virtualPage = i;
-        pageTable[i].physicalPage = kernel->gPhysPageBitMap->FindAndSet();
-        pageTable[i].valid = TRUE;
-        pageTable[i].use = FALSE;
-        pageTable[i].dirty = FALSE;
-        pageTable[i].readOnly = FALSE;
-
-        bzero(&kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize], PageSize); // zero out the physical memory
-    }
-
-    kernel->addrLock->V();
-
     // then, copy in the code and data segments into memory
-    // Note: this code assumes that virtual address = physical address
-    // MODIFIED: now virtual address is mapped to physical address
-    if (noffH.code.size > 0)
-    {
-        for (i = 0; i < numPages; i++)
-            executable->ReadAt(
-                &(kernel->machine->mainMemory[noffH.code.virtualAddr]) +
-                    (pageTable[i].physicalPage * PageSize),
-                PageSize, noffH.code.inFileAddr + (i * PageSize));
-    }
+    LoadCodeAndData(executable, noffH);
 
-    if (noffH.initData.size > 0)
-    {
-        for (i = 0; i < numPages; i++)
-            executable->ReadAt(
-                &(kernel->machine->mainMemory[noffH.initData.virtualAddr]) +
-                    (pageTable[i].physicalPage * PageSize),
-                PageSize, noffH.initData.inFileAddr + (i * PageSize));
-    }
-
-#ifdef RDATA
-    if (noffH.readonlyData.size > 0)
-    {
-        for (i = 0; i < numPages; i++)
-            executable->ReadAt(
-                &(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]) +
-                    (pageTable[i].physicalPage * PageSize),
-                PageSize, noffH.readonlyData.inFileAddr + (i * PageSize));
-    }
-#endif
+    // load the arguments into memory
+    LoadArguments(argc, argv);
 
     delete executable; // close file
     return TRUE;       // success
+}
+
+//----------------------------------------------------------------------
+// AddrSpace::LoadCodeAndData
+// 	Load code and data segments into memory
+//----------------------------------------------------------------------
+void AddrSpace::LoadCodeAndData(OpenFile *executable, NoffHeader noffH)
+{
+    unsigned int vaddr, paddr;
+
+    // load the code segment into memory
+    for (int i = 0; i < noffH.code.size; i++)
+    {
+        vaddr = noffH.code.virtualAddr + i;
+        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+        executable->ReadAt(&(kernel->machine->mainMemory[paddr]), 1, noffH.code.inFileAddr + i);
+    }
+
+    // load the data segment into memory
+    for (int i = 0; i < noffH.initData.size; i++)
+    {
+        vaddr = noffH.initData.virtualAddr + i;
+        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+        executable->ReadAt(&(kernel->machine->mainMemory[paddr]), 1, noffH.initData.inFileAddr + i);
+    }
+
+    // zero out the uninitialized data segment
+    for (int i = 0; i < noffH.uninitData.size; i++)
+    {
+        vaddr = noffH.uninitData.virtualAddr + i;
+        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+        kernel->machine->mainMemory[paddr] = 0;
+    }
+
+#ifdef RDATA
+    // load read only data segment
+    for (int i = 0; i < noffH.readonlyData.size; i++)
+    {
+        vaddr = noffH.readonlyData.virtualAddr + i;
+        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+        executable->ReadAt(&(kernel->machine->mainMemory[paddr]), 1, noffH.readonlyData.inFileAddr + i);
+    }
+#endif
+}
+
+//----------------------------------------------------------------------
+// AddrSpace::LoadArguments
+// 	Load command line arguments into memory
+//----------------------------------------------------------------------
+void AddrSpace::LoadArguments(int argc, char **argv)
+{
+    unsigned int vaddr, paddr, ptr, size;
+
+    size = PageSize * numPages;
+    ptr = size - 8;
+
+    // copy the strings into memory
+    for (int i = 0; i < argc; ++i)
+        ptr -= strlen(argv[i]) + 1;
+    vaddr = ptr;
+
+    for (int i = 0; i < argc; ++i)
+    {
+        int len = strlen(argv[i]) + 1;
+        for (int j = 0; j < len; ++j)
+        {
+            paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+            kernel->machine->mainMemory[paddr] = argv[i][j];
+            vaddr++;
+        }
+    }
+
+    // copy the string array into memory
+    vaddr = ptr - (argc + 1) * sizeof(char *);
+    while (vaddr % 4 != 0) vaddr--;
+    this->argv = vaddr;
+    this->argc = argc;
+
+    for (int i = 0; i < argc; ++i)
+    {
+        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+        *(unsigned int *)(&kernel->machine->mainMemory[paddr]) = ptr;
+        vaddr += sizeof(char *);
+        ptr += strlen(argv[i]) + 1;
+    }
+    paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+    *(unsigned int *)(&kernel->machine->mainMemory[paddr]) = (unsigned int)0;
+
+    // initialize the stack pointer
+    vaddr = this->argv - 4;
+    while (vaddr % 8 != 0) vaddr--;
+    this->stackptr = vaddr;
+}
+
+//----------------------------------------------------------------------
+// AddrSpace::ArgumentSize
+// 	Compute the size of the arguments in memory
+//----------------------------------------------------------------------
+unsigned int AddrSpace::ArgumentSize(int argc, char **argv)
+{
+    unsigned int vaddr, paddr, ptr, size;
+
+    size = PageSize * numPages;
+    ptr = size - 8;
+
+    // size of the strings in memory
+    for (int i = 0; i < argc; ++i)
+        ptr -= strlen(argv[i]) + 1;
+
+    // size of the string array in memory
+    ASSERT(sizeof(char *) == 4);
+    vaddr = ptr - (argc + 1) * sizeof(char *);
+    while (vaddr % 4 != 0) vaddr--;
+
+    // the stack pointer
+    vaddr = vaddr - 4;
+    while (vaddr % 8 != 0) vaddr--;
+
+    return size - vaddr;
 }
 
 //----------------------------------------------------------------------
@@ -223,102 +328,6 @@ void AddrSpace::Execute()
     ASSERTNOTREACHED(); // machine->Run never returns;
                         // the address space exits
                         // by doing the syscall "exit"
-}
-
-//----------------------------------------------------------------------
-// AddrSpace::ExecuteV
-// 	Run a user program using the current thread
-//
-//      The program is assumed to have already been loaded into
-//      the address space
-//
-//----------------------------------------------------------------------
-
-void AddrSpace::ExecuteV(int argc, char **argv)
-{
-
-    kernel->currentThread->space = this;
-
-    this->InitRegisters(); // set the initial register values
-    this->RestoreState();  // load page table register
-
-    this->PassArgs(argc, argv);
-
-    kernel->machine->Run(); // jump to the user progam
-
-    ASSERTNOTREACHED(); // machine->Run never returns;
-                        // the address space exits
-                        // by doing the syscall "exit"
-}
-
-//----------------------------------------------------------------------
-// AddrSpace::PassArg
-// 	Pass arguments to the user program
-//
-//      The program is assumed to have already been loaded into
-//      the address space
-//
-//----------------------------------------------------------------------
-
-void AddrSpace::PassArgs(int argc, char **argv)
-{
-    Machine *machine = kernel->machine;
-
-    machine->WriteRegister(4, argc);
-
-    // Print the arguments
-    for (int i = 0; i < argc; i++)
-    {
-        DEBUG(dbgAddr, "argv[" << i << "]: " << argv[i]);
-    }
-
-    // Allocate space for the arguments
-    int argSize = 0;
-    for (int i = 0; i < argc; i++)
-    {
-        argSize += strlen(argv[i]) + 1;
-    }
-
-    int argAddr = numPages * PageSize - argSize;
-    int argAddrStart = argAddr;
-
-    // Copy the arguments to the user space
-    for (int i = 0; i < argc; i++)
-    {
-        int argLen = strlen(argv[i]) + 1;
-        for (int j = 0; j < argLen; j++)
-        {
-            machine->WriteMem(argAddr, 1, argv[i][j]);
-            argAddr++;
-        }
-    }
-
-    // Allocate space for the pointers to the arguments including the null pointer
-    int argPtrAddr = argAddrStart - (argc + 1) * 4;
-    while (argPtrAddr % 4 != 0)
-    {
-        argPtrAddr--;
-    }
-    int argPtrAddrStart = argPtrAddr;
-
-    // Copy the pointers to the arguments to the user space
-    for (int i = 0; i < argc; i++)
-    {
-        machine->WriteMem(argPtrAddr, 4, argAddrStart);
-        argPtrAddr += 4;
-        argAddrStart += strlen(argv[i]) + 1;
-    }
-    machine->WriteMem(argPtrAddr, 4, 0);
-
-    machine->WriteRegister(5, argPtrAddrStart);
-
-    // Set the stack pointer
-    int stackreg = argPtrAddrStart - 4;
-    while (stackreg % 8 != 0)
-    {
-        stackreg--;
-    }
-    machine->WriteRegister(StackReg, stackreg);
 }
 
 //----------------------------------------------------------------------
@@ -352,8 +361,12 @@ void AddrSpace::InitRegisters()
     // Set the stack register to the end of the address space, where we
     // allocated the stack; but subtract off a bit, to make sure we don't
     // accidentally reference off the end!
-    machine->WriteRegister(StackReg, numPages * PageSize - 16);
-    DEBUG(dbgAddr, "Initializing stack pointer: " << numPages * PageSize - 16);
+    machine->WriteRegister(StackReg, stackptr);
+    DEBUG(dbgAddr, "Initializing stack pointer: " << stackptr);
+
+    // Set the argument registers
+    machine->WriteRegister(4, argc);
+    machine->WriteRegister(5, argv);
 }
 
 //----------------------------------------------------------------------

@@ -7,3 +7,4 @@ UseCRLF: false
 SortIncludes: false
 SeparateDefinitionBlocks: Always
 AllowShortFunctionsOnASingleLine: All
+AllowShortLoopsOnASingleLine: true

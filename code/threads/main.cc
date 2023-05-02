@@ -321,10 +321,10 @@ int main(int argc, char **argv)
     {
         AddrSpace *space = new AddrSpace;
         ASSERT(space != (AddrSpace *)NULL);
-        if (space->Load(userProgName))
-        {                                  // load the program into the space
-            space->ExecuteV(_argc, _argv); // run the program
-            ASSERTNOTREACHED();            // Execute never returns
+        if (space->Load(userProgName, _argc, _argv))
+        {                       // load the program into the space
+            space->Execute();   // run the program
+            ASSERTNOTREACHED(); // Execute never returns
         }
     }
 

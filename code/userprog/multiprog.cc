@@ -64,9 +64,10 @@ void SyscallExit()
     kernel->pTab->ExitUpdate(status);
 
     DEBUG(dbgSys, "Successful exit file '" << status << "'\n");
-    kernel->machine->WriteRegister(2, status); // trả về cho chương trình
-    // người dùng thành công
+    kernel->machine->WriteRegister(2, status); // trả về cho chương trình người dùng thành công
 
     /* Modify return point */
     recoverPC();
+
+    kernel->currentThread->Finish(); // Finish the currentThread
 }
