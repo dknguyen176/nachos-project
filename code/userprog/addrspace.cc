@@ -81,7 +81,7 @@ AddrSpace::AddrSpace()
 AddrSpace::~AddrSpace()
 {
     int i;
-    for (i = 0; i < NumPhysPages; i++)
+    for (i = 0; i < numPages; i++)
     {
         kernel->gPhysPageBitMap->Clear(pageTable[i].physicalPage);
     }
