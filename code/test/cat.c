@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Usage: cat <filename>\n");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     filename = argv[1];
@@ -34,6 +34,4 @@ int main(int argc, char *argv[])
 
     len = _strcpy(msg, "\nRead file successfully\n");
     Write(msg, len, _ConsoleOutput);
-
-    Halt();
 }

@@ -38,7 +38,7 @@ int main()
         {
             len = _strcpy(msg, "Can not open socket");
             Write(msg, len, _ConsoleOutput);
-            Halt();
+            Exit(-1);
         }
 
         // Connect to server
@@ -46,7 +46,7 @@ int main()
         {
             len = _strcpy(msg, "Can not connect to server");
             Write(msg, len, _ConsoleOutput);
-            Halt();
+            Exit(-1);
         }
 
         // Send message
@@ -55,7 +55,7 @@ int main()
         {
             len = _strcpy(msg, "Can not write to socket");
             Write(msg, len, _ConsoleOutput);
-            Halt();
+            Exit(-1);
         }
 
         // Receive message
@@ -64,7 +64,7 @@ int main()
         {
             len = _strcpy(msg, "Can not read from socket");
             Write(msg, len, _ConsoleOutput);
-            Halt();
+            Exit(-1);
         }
 
         // Print result
@@ -79,13 +79,10 @@ int main()
         {
             len = _strcpy(msg, "Can not close socket");
             Write(msg, len, _ConsoleOutput);
-            Halt();
+            Exit(-1);
         }
     }
 
     len = _strcpy(msg, "Client finished\n");
     Write(msg, len, _ConsoleOutput);
-
-    Halt();
-    /* not reached */
 }

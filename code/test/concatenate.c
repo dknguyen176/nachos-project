@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Usage: concatenate <filename1> <filename2>\n");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     filenameSrc1 = argv[1];
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Open file error\n");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     size1 = Seek(-1, fd1);
@@ -56,6 +56,4 @@ int main(int argc, char *argv[])
 
     len = _strcpy(msg, "\nConcatenate file successfully\n");
     Write(msg, len, _ConsoleOutput);
-
-    Halt();
 }

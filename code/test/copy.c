@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Usage: copy <filenameSrc> <filenameDst>\n");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     filenameSrc = argv[1];
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Create file error\n");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
     fddst = Open(filenameDst, O_RDWR);
 
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Open file error\n");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     Seek(0, fdsrc);
@@ -57,6 +57,4 @@ int main(int argc, char *argv[])
 
     len = _strcpy(msg, "Copy file successfully\n");
     Write(msg, len, _ConsoleOutput);
-
-    Halt();
 }

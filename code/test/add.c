@@ -9,10 +9,8 @@
 
 int main()
 {
-  int result;
+    int result;
 
-  result = Add(42, 23);
-
-  Halt();
-  /* not reached */
+    result = Add(42, 23);
+    /* not reached */
 }

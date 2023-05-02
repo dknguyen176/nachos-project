@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Usage: fileclient <srcfilename> <dstfilename>");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     srcfilename = argv[1];
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Can not create file");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
     fddst = Open(dstfilename, O_RDWR);
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Can not open file");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     Seek(0, fdsrc);
@@ -65,13 +65,13 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Can not open socket");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
     if (Connect(sockID, ip, PORT) == -1)
     {
         len = _strcpy(msg, "Can not connect to server");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     // result = Send(sockID, "Hello from client", 17);
@@ -82,13 +82,13 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Can not write to socket");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
     if (Read(receiveMessage, BUFFER_SIZE, sockID) == -1)
     {
         len = _strcpy(msg, "Can not read from socket");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     Write(receiveMessage, BUFFER_SIZE, fddst);
@@ -100,16 +100,13 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Can not close file");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
 
     if (CloseSocket(sockID) == -1)
     {
         len = _strcpy(msg, "Can not close socket");
         Write(msg, len, _ConsoleOutput);
-        Halt();
+        Exit(-1);
     }
-
-    Halt();
-    /* not reached */
 }
