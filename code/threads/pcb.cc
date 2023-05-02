@@ -38,19 +38,48 @@ int PCB::Exec(char *filename, int pid)
     thread->processID = pid;                     // Set processID of this thread to id.
     parentID = kernel->currentThread->processID; // Set the parentID of this thread to be the processID of the thread calling Exec
 
-    int *zz = new int;              // create a new int pointer to pass to StartProcess function as parameter
-    *zz = pid;                      // note that if we pass &pid, the value of pid will be destroyed after this function, so we need to create a new int pointer
-    thread->Fork(StartProcess, zz); // Fork a thread to run StartProcess
+    ProcessArg *arg = new ProcessArg;
+    arg->pid = pid;
+    arg->argc = 0;
+    arg->argv = NULL;
+
+    thread->Fork(StartProcess, (void *)arg); // Fork a thread to run StartProcess
     mutex->V();
 }
 
-void StartProcess(void *id)
+int PCB::ExecV(char *filename, int pid, int argc, char **argv)
+{
+    mutex->P(); // Call mutex->P() to help avoid loading 2 processes at the same time
+    thread = new Thread(filename);
+    if (thread == NULL)
+    {
+        printf("PCB::Exec Error -- Not enough memory\n");
+        mutex->V();
+        return -1;
+    }
+    thread->processID = pid;                     // Set processID of this thread to id.
+    parentID = kernel->currentThread->processID; // Set the parentID of this thread to be the processID of the thread calling Exec
+
+    ProcessArg *arg = new ProcessArg;
+    arg->pid = pid;
+    arg->argc = argc;
+    arg->argv = argv;
+
+    thread->Fork(StartProcess, (void *)arg); // Fork a thread to run StartProcess
+    mutex->V();
+}
+
+void StartProcess(void *arg)
 {
     // Use load and run to load the executable file into the address space of the current thread
-    int pid = *(int *)id;
+    ProcessArg *processArg = (ProcessArg *)arg;
+    int pid = processArg->pid;
+    int argc = processArg->argc;
+    char **argv = processArg->argv;
+
     char *filename = kernel->pTab->GetFileName(pid);
     AddrSpace *space = new AddrSpace();
-    if (!space->Load(filename))
+    if (!space->Load(filename, argc, argv))
     {
         printf("\nError loading executable\n");
         return;

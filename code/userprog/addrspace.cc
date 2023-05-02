@@ -97,12 +97,10 @@ bool AddrSpace::Allocate(char *filename, unsigned int size)
     numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
 
-    /*
     ASSERT(numPages <= NumPhysPages); // check we're not trying
                                       // to run anything too big --
                                       // at least until we have
                                       // virtual memory
-    */
 
     if (numPages > kernel->gPhysPageBitMap->NumClear())
     {
@@ -191,6 +189,7 @@ bool AddrSpace::Load(char *fileName, int argc, char **argv)
 // AddrSpace::LoadCodeAndData
 // 	Load code and data segments into memory
 //----------------------------------------------------------------------
+
 void AddrSpace::LoadCodeAndData(OpenFile *executable, NoffHeader noffH)
 {
     unsigned int vaddr, paddr;
@@ -234,6 +233,7 @@ void AddrSpace::LoadCodeAndData(OpenFile *executable, NoffHeader noffH)
 // AddrSpace::LoadArguments
 // 	Load command line arguments into memory
 //----------------------------------------------------------------------
+
 void AddrSpace::LoadArguments(int argc, char **argv)
 {
     unsigned int vaddr, paddr, ptr, size;
@@ -283,6 +283,7 @@ void AddrSpace::LoadArguments(int argc, char **argv)
 // AddrSpace::ArgumentSize
 // 	Compute the size of the arguments in memory
 //----------------------------------------------------------------------
+
 unsigned int AddrSpace::ArgumentSize(int argc, char **argv)
 {
     unsigned int vaddr, paddr, ptr, size;

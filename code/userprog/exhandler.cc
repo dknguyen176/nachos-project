@@ -78,6 +78,18 @@ char *readChars(int reg, int limit)
     return str;
 }
 
+char **readCharsArray(int reg, int size)
+{
+    char **argv = new char *[size];
+    int listAddr = kernel->machine->ReadRegister(reg);
+
+    for (int i = 0; i < size; i++)
+    {
+        argv[i] = User2System(listAddr + i * BUFFER_SIZE, MAX_FILENAME_LENGTH);
+    }
+    return argv;
+}
+
 void recoverPC()
 {
     /* set previous programm counter (debugging only)*/

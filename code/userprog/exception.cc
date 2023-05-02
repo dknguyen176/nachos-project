@@ -171,6 +171,10 @@ void ExceptionHandler(ExceptionType which)
             SyscallExec();
             return;
 
+        case SC_ExecV:
+            SyscallExecV();
+            return;
+
         case SC_Join:
             SyscallJoin();
             return;

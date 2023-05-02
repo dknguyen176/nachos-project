@@ -51,7 +51,7 @@ int PTable::ExecUpdate(char *filename)
         return -1;
     }
 
-    int pid = GetFreeSlotAndSet(); // Find the empty position in the Ptable table
+    int pid = GetFreeSlotAndSet(); // Find the empty position in the PTable table
     if (pid == -1)
     {
         printf("PTable::ExecUpdate Error -- No empty slot\n");
@@ -63,6 +63,45 @@ int PTable::ExecUpdate(char *filename)
     pcb[pid]->SetParentID(kernel->currentThread->processID); // parentID is processID of currentThread
     pcb[pid]->SetFileName(filename);
     pcb[pid]->Exec(filename, pid); // Call the method Exec of PCB class
+    bmsem->V();
+
+    return pid;
+}
+
+int PTable::ExecVUpdate(char *filename, int argc, char **argv)
+{
+    bmsem->P();           // Avoid loading 2 processes at the same time.
+    if (filename == NULL) // Check the validity of the program "name".
+    {
+        printf("PTable::ExecUpdate Error -- File name is NULL\n");
+        bmsem->V();
+        return -1;
+    }
+    if (kernel->fileSystem->Open(filename) == NULL) // Check the existence of the program "name" by calling the Open method of FileSystem class.
+    {
+        printf("PTable::ExecUpdate Error -- File name is invalid\n");
+        bmsem->V();
+        return -1;
+    }
+    if (strcmp(filename, kernel->pTab->GetFileName(kernel->currentThread->processID)) == 0) // Compare program name and currentThread name to make sure this program is not called Exec itself.
+    {
+        printf("PTable::ExecUpdate Error -- Can't execute itself\n");
+        bmsem->V();
+        return -1;
+    }
+
+    int pid = GetFreeSlotAndSet(); // Find the empty position in the PTable table
+    if (pid == -1)
+    {
+        printf("PTable::ExecUpdate Error -- No empty slot\n");
+        bmsem->V();
+        return -1;
+    }
+
+    pcb[pid] = new PCB(pid);                                 // create a new PCB with processID being the index of this slot
+    pcb[pid]->SetParentID(kernel->currentThread->processID); // parentID is processID of currentThread
+    pcb[pid]->SetFileName(filename);
+    pcb[pid]->ExecV(filename, pid, argc, argv); // Call the method Exec of PCB class
     bmsem->V();
 
     return pid;

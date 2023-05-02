@@ -12,6 +12,7 @@ extern char *User2System(int virtAddr, int limit = -1);
 extern int System2User(int virtAddr, int len, char *buffer);
 extern int readInt(int reg);
 extern char *readChars(int reg, int limit);
+extern char **readCharsArray(int reg, int size);
 extern void recoverPC();
 
 extern void SyscallReadString();
@@ -36,6 +37,7 @@ extern void SyscallReceiveSocket();
 
 // Multiprogramming exception handler
 extern void SyscallExec();
+extern void SyscallExecV();
 extern void SyscallJoin();
 extern void SyscallExit();
 

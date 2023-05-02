@@ -5,6 +5,13 @@
 
 class Semaphore;
 
+struct ProcessArg
+{
+    int pid;
+    int argc;
+    char **argv;
+};
+
 class PCB
 {
 private:
@@ -25,12 +32,13 @@ public:
 
     // Load the program has the name is “filename” and the process id is pid
     int Exec(char *name, int pid); // Create a thread with the name is filename and the process id is pid
-    void JoinWait();               // The parent process wait for the child process finishes
-    void ExitWait();               // The child process finishes
-    void JoinRelease();            // The child process notice the parent process
-    void ExitRelease();            // The parent process accept to exit the child process
-    void IncNumWait();             // Increase the number of the waiting process
-    void DecNumWait();             // Decrease the number of the waiting process
+    int ExecV(char *name, int pid, int argc, char **argv);
+    void JoinWait();    // The parent process wait for the child process finishes
+    void ExitWait();    // The child process finishes
+    void JoinRelease(); // The child process notice the parent process
+    void ExitRelease(); // The parent process accept to exit the child process
+    void IncNumWait();  // Increase the number of the waiting process
+    void DecNumWait();  // Decrease the number of the waiting process
 
     // Set-Get Methods
     void SetExitCode(int);    // Set the exit code for the process
@@ -43,6 +51,6 @@ public:
     char *GetFileName();      // Return the process name
 };
 
-void StartProcess(void *id); // Used to start the process
+void StartProcess(void *arg); // Used to start the process
 
 #endif
