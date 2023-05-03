@@ -33,10 +33,18 @@ STable::~STable()
 int STable::Create(char *name, int init)
 {
     if (Find(name) != -1)
+    {
+        DEBUG(dbgInfo, "STable::Create Error -- Semaphore name already exists\n")
         return -1;
+    }
+
     int id = FindFreeSlotAndSet();
     if (id == -1)
+    {
+        DEBUG(dbgInfo, "STable::Create Error -- No free slot\n")
         return -1;
+    }
+
     semTab[id] = new Sem(name, init);
     return 0;
 }
@@ -45,7 +53,11 @@ int STable::Wait(char *name)
 {
     int id = Find(name);
     if (id == -1)
+    {
+        DEBUG(dbgInfo, "STable::Wait Error -- Semaphore name not found\n")
         return -1;
+    }
+
     semTab[id]->wait();
     return 0;
 }
@@ -54,7 +66,11 @@ int STable::Signal(char *name)
 {
     int id = Find(name);
     if (id == -1)
+    {
+        DEBUG(dbgInfo, "STable::Signal Error -- Semaphore name not found\n")
         return -1;
+    }
+
     semTab[id]->signal();
     return 0;
 }

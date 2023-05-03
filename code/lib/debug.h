@@ -29,6 +29,7 @@ const char dbgFile = 'f';   // file system
 const char dbgAddr = 'a';   // address spaces
 const char dbgNet = 'n';    // network emulation
 const char dbgSys = 'u';    // systemcall
+const char dbgInfo = 'o';   // custom flag
 
 class Debug
 {
@@ -54,6 +55,19 @@ extern Debug *debug;
     else                         \
     {                            \
         cerr << expr << "\n";    \
+    }
+
+//----------------------------------------------------------------------
+// DEBUGNOENDL
+//      If flag is enabled, print a message.
+//----------------------------------------------------------------------
+#define DEBUGNOENDL(flag, expr)  \
+    if (!debug->IsEnabled(flag)) \
+    {                            \
+    }                            \
+    else                         \
+    {                            \
+        cerr << expr;            \
     }
 
 //----------------------------------------------------------------------

@@ -64,9 +64,8 @@ Thread::Thread(char *threadName)
 
 Thread::~Thread()
 {
-    cerr << ">>> Deleting thread: " << name << endl;
-
-    DEBUG(dbgThread, "Deleting thread: " << name);
+    DEBUG(dbgInfo, "Deleting thread: " << name << "\n");
+    DEBUG(dbgThread, "Deleting thread: " << name << "\n");
 
     ASSERT(this != kernel->currentThread);
 

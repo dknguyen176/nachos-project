@@ -124,12 +124,12 @@ bool AddrSpace::Allocate(char *filename, unsigned int size)
         bzero(&kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize], PageSize); // zero out the physical memory
     }
 
-    cerr << "Page table initialized\n";
+    DEBUG(dbgInfo, "Physical pages allocated: " << numPages);
     for (int i = 0; i < numPages; i++)
     {
-        cerr << pageTable[i].physicalPage << " ";
+        DEBUGNOENDL(dbgInfo, pageTable[i].physicalPage << " ");
     }
-    cerr << "\n";
+    DEBUG(dbgInfo, "\n");
 
     kernel->addrLock->V();
 
@@ -154,7 +154,7 @@ bool AddrSpace::Load(char *fileName, int argc, char **argv)
 
     if (executable == NULL)
     {
-        cerr << "Unable to open file " << fileName << "\n";
+        DEBUG(dbgInfo, "Unable to open file " << fileName << "\n");
         return FALSE;
     }
 
@@ -199,6 +199,14 @@ bool AddrSpace::Load(char *fileName, int argc, char **argv)
 
 void AddrSpace::LoadCodeAndData(OpenFile *executable, NoffHeader noffH)
 {
+    DEBUG(dbgInfo, "Code size " << noffH.code.size);
+    DEBUG(dbgInfo, "Init data size " << noffH.initData.size);
+    DEBUG(dbgInfo, "Uninit data size " << noffH.uninitData.size);
+#ifdef RDATA
+    DEBUG(dbgInfo, "Read only data size " << noffH.readonlyData.size);
+#endif
+    DEBUG(dbgInfo, "");
+
     unsigned int vaddr, paddr;
 
     // load the code segment into memory
@@ -450,8 +458,7 @@ AddrSpace::Translate(unsigned int vaddr, unsigned int *paddr, int isReadWrite)
 
     ASSERT((*paddr < MemorySize));
 
-    // cerr << " -- AddrSpace::Translate(): vaddr: " << vaddr <<
-    //   ", paddr: " << *paddr << "\n";
+    // cerr << " -- AddrSpace::Translate(): vaddr: " << vaddr << ", paddr: " << *paddr << "\n";
 
     return NoException;
 }
