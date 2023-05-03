@@ -1,4 +1,7 @@
-#include "exhandler.h"
+#include "handler.h"
+#include "main.h"
+#include "syscall.h"
+#include "ksyscall.h"
 #include "constant.h"
 
 #include <stdlib.h>

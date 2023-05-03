@@ -294,18 +294,19 @@ USERPROG_H = ../userprog/addrspace.h\
 	../userprog/ksyscall.h\
 	../userprog/synchconsole.h\
 	../userprog/noff.h\
-	../userprog/exhandler.h
+	../userprog/handler.h
 
 USERPROG_C = ../userprog/addrspace.cc\
 	../userprog/exception.cc\
 	../userprog/synchconsole.cc\
 	../userprog/ksyscall.cc\
-	../userprog/exhandler.cc\
-	../userprog/file.cc\
-	../userprog/socket.cc\
-	../userprog/multiprog.cc
+	../userprog/handler.cc\
+	../userprog/handler.file.cc\
+	../userprog/handler.socket.cc\
+	../userprog/handler.multiprog.cc\
+	../userprog/handler.synch.cc
 
-USERPROG_O = addrspace.o ksyscall.o exception.o synchconsole.o exhandler.o file.o socket.o multiprog.o
+USERPROG_O = addrspace.o ksyscall.o exception.o synchconsole.o handler.o handler.file.o handler.socket.o handler.multiprog.o handler.synch.o
 
 FILESYS_H =../filesys/directory.h \
 	../filesys/filehdr.h\

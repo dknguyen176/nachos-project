@@ -22,6 +22,7 @@
 #define SC_Exit 1
 #define SC_Exec 2
 #define SC_Join 3
+
 #define SC_Create 4
 #define SC_Remove 5
 #define SC_Open 6
@@ -29,6 +30,7 @@
 #define SC_Write 8
 #define SC_Seek 9
 #define SC_Close 10
+
 #define SC_ThreadFork 11
 #define SC_ThreadYield 12
 #define SC_ExecV 13
@@ -41,9 +43,13 @@
 #define SC_Receive 23
 #define SC_CloseSocket 24
 
-#define SC_Add 42
+#define SC_CreateSemaphore 30
+#define SC_DestroySemaphore 31
+#define SC_Wait 32
+#define SC_Signal 33
 
-#define SC_PrintInt 64
+#define SC_Add 42
+#define SC_PrintInt 43
 
 #define O_RDWR 0
 #define O_RDONLY 1
@@ -156,20 +162,39 @@ int Seek(int position, OpenFileId id);
  */
 int Close(OpenFileId id);
 
-/* System call for Network operations
- * Open a Socket
- * Connect to a Socket via IP and Port
- * Send and Receive data from Socket
- * Close a Socket
+/* System call for Network operations: OpenSocket, Connect, Send, Receive, CloseSocket
+ * These functions are patterned after UNIX
+ *
+ * Note that the Nachos network has a stub implementation, which
+ * can be used to support these system calls if the regular Nachos
+ * network has not been implemented.
+ */
+
+/* A unique identifier for a socket
+ * Return a positive SocketId on success, negative error code on failure
  */
 int OpenSocket();
 
+/* Connect to a socket
+ * Return 1 on success, negative error code on failure
+ */
 int Connect(int sockID, char *ip, int port);
 
+/* Send data to a socket
+ * Return the number of bytes actually sent on success.
+ * On failure, a negative error code is returned.
+ */
 int Send(int sockID, char *buffer, int len);
 
+/* Receive data from a socket
+ * Return the number of bytes actually received on success.
+ * On failure, a negative error code is returned.
+ */
 int Receive(int sockID, char *buffer, int len);
 
+/* Close the socket, we're done reading and writing to it.
+ * Return 1 on success, negative error code on failure
+ */
 int CloseSocket(int sockID);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
@@ -199,6 +224,31 @@ int ThreadJoin(ThreadId id);
  * Deletes current thread and returns ExitCode to every waiting lokal thread.
  */
 void ThreadExit(int ExitCode);
+
+/* Synchronization functions: CreateSemaphore, Wait, Signal, DestroySemaphore
+ *
+ * Could define other operations, such as LockAcquire, LockRelease, etc.
+ */
+
+/* Create a semaphore with the given name and initial value.
+ * Return a positive integer on success, negative error code on failure
+ */
+int CreateSemaphore(char *name, int semval);
+
+/* Destroy a semaphore with the given name.
+ * Return 1 on success, negative error code on failure
+ */
+int DestroySemaphore(char *name);
+
+/* Wait on a semaphore with the given name.
+ * Return 1 on success, negative error code on failure
+ */
+int Wait(char *name);
+
+/* Signal a semaphore with the given name.
+ * Return 1 on success, negative error code on failure
+ */
+int Signal(char *name);
 
 #endif /* IN_ASM */
 

@@ -21,7 +21,11 @@
 // All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
 
-#include "exhandler.h"
+#include "copyright.h"
+#include "main.h"
+#include "syscall.h"
+#include "ksyscall.h"
+#include "handler.h"
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -119,6 +123,7 @@ void ExceptionHandler(ExceptionType which)
             SyscallPrintInt();
             return;
 
+        /* File system operations */
         case SC_Create:
             SyscallCreateFile();
             return;
@@ -147,6 +152,7 @@ void ExceptionHandler(ExceptionType which)
             SyscallRemoveFile();
             return;
 
+        /* Network operations */
         case SC_OpenSocket:
             SyscallOpenSocket();
             return;
@@ -167,6 +173,7 @@ void ExceptionHandler(ExceptionType which)
             SyscallReceiveSocket();
             return;
 
+        /* Process operations */
         case SC_Exec:
             SyscallExec();
             return;
@@ -181,6 +188,23 @@ void ExceptionHandler(ExceptionType which)
 
         case SC_Exit:
             SyscallExit();
+            return;
+
+        /* Synchronization operations */
+        case SC_CreateSemaphore:
+            SyscallCreateSemaphore();
+            return;
+
+        case SC_DestroySemaphore:
+            SyscallDestroySemaphore();
+            return;
+
+        case SC_Wait:
+            SyscallWaitSemaphore();
+            return;
+
+        case SC_Signal:
+            SyscallSignalSemaphore();
             return;
 
         default:

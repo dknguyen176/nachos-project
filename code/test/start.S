@@ -98,6 +98,12 @@ Join:
 	j	$31
 	.end Join
 
+/* -------------------------------------------------------------
+ * System call for File system operations:
+ *	Create, Remove, Open, Read, Write, Close
+ * -------------------------------------------------------------
+ */
+
 	.globl Create
 	.ent	Create
 Create:
@@ -138,6 +144,14 @@ Write:
 	j	$31
 	.end Write
 
+	.globl Seek
+	.ent	Seek
+Seek:
+	addiu $2,$0,SC_Seek
+	syscall
+	j	$31
+	.end Seek
+
 	.globl Close
 	.ent	Close
 Close:
@@ -146,13 +160,11 @@ Close:
 	j	$31
 	.end Close
 
-	.globl Seek
-	.ent	Seek
-Seek:
-	addiu $2,$0,SC_Seek
-	syscall
-	j	$31
-	.end Seek
+/* -------------------------------------------------------------
+ * System call for Network operations:
+ *	OpenSocket, Connect, Send, Receive, CloseSocket
+ * -------------------------------------------------------------
+ */
 
 	.globl OpenSocket
 	.ent	OpenSocket
@@ -194,6 +206,12 @@ CloseSocket:
 	j	$31
 	.end CloseSocket
 
+/* -------------------------------------------------------------
+ * System call for User-level thread operations:
+ *	Fork and Yield
+ * -------------------------------------------------------------
+ */
+
         .globl ThreadFork
         .ent    ThreadFork
 ThreadFork:
@@ -225,6 +243,45 @@ ThreadJoin:
 	syscall
 	j 	$31
 	.end ThreadJoin
+
+/* -------------------------------------------------------------
+ * System call for Synchronization functions:
+ *	CreateSemaphore, Wait, Signal, DestroySemaphore
+ * -------------------------------------------------------------
+ */
+
+	.globl CreateSemaphore
+	.ent    CreateSemaphore
+CreateSemaphore:
+	addiu $2, $0, SC_CreateSemaphore
+	syscall
+	j 	$31
+	.end CreateSemaphore
+
+	.globl DestroySemaphore
+	.ent    DestroySemaphore
+DestroySemaphore:
+	addiu $2, $0, SC_DestroySemaphore
+	syscall
+	j 	$31
+	.end DestroySemaphore
+
+	.globl Wait
+	.ent    Wait
+Wait:
+	addiu $2, $0, SC_Wait
+	syscall
+	j 	$31
+	.end Wait
+
+	.globl Signal
+	.ent    Signal
+Signal:
+	addiu $2, $0, SC_Signal
+	syscall
+	j 	$31
+	.end Signal
+
 	
 /* dummy function to keep gcc happy */
         .globl  __main

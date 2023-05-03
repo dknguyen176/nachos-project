@@ -1,4 +1,7 @@
-#include "exhandler.h"
+#include "handler.h"
+#include "main.h"
+#include "constant.h"
+#include "syscall.h"
 
 char *User2System(int virtAddr, int limit)
 {

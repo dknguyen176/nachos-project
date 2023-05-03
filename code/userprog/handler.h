@@ -1,11 +1,5 @@
-#ifndef EXCEPTION_UTILITY_H
-#define EXCEPTION_UTILITY_H
-
-#include "copyright.h"
-#include "main.h"
-#include "syscall.h"
-#include "ksyscall.h"
-#include "debug.h"
+#ifndef HANDLER_H
+#define HANDLER_H
 
 // Some helper function
 extern char *User2System(int virtAddr, int limit = -1);
@@ -41,4 +35,10 @@ extern void SyscallExecV();
 extern void SyscallJoin();
 extern void SyscallExit();
 
-#endif // EXCEPTION_UTILITY_H
+// Synchronization exception handler
+extern void SyscallCreateSemaphore();
+extern void SyscallDestroySemaphore();
+extern void SyscallWaitSemaphore();
+extern void SyscallSignalSemaphore();
+
+#endif // HANDLER_H
