@@ -12,8 +12,7 @@ void SyscallPrintInt()
 
     int number = readInt(4);
 
-    DEBUG(dbgSys, "Print integer : " << number << "\n");
-    // printf("%d", number);
+    cerr << "Print integer : " << number << "\n";
 
     /* Modify return point */
     recoverPC();

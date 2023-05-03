@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
     {
         len = _strcpy(msg, "Create file error\n");
         Write(msg, len, _ConsoleOutput);
+        Exit(-1);
     }
     else
     {
