@@ -3,6 +3,16 @@
 #define input _ConsoleInput
 #define output _ConsoleOutput
 
+/*
+ * IMPORTANT NOTE
+ *  Small uninitialized global data (8 bytes or fewer) is stored in the .sbss segment.
+ *  However, the current coff2noff does not handle the .sbss segment.
+ *  So any small global data must be initialized.
+ */
+
+int argc = 0;
+char argv[5][BUFFER_SIZE];
+
 int _strcpy(char *dest, const char *src)
 {
     int i = 0;
@@ -48,19 +58,13 @@ void split(char *str, int *argc, char argv[][BUFFER_SIZE])
 
 int main()
 {
-    int argc;
-    char argv[5][BUFFER_SIZE];
     int status;
     SpaceId newProc;
-    char prompt[2];
     char buffer[BUFFER_SIZE];
-
-    prompt[0] = '-';
-    prompt[1] = '-';
 
     while (1)
     {
-        Write(prompt, 2, output);
+        print("shell> ");
         Read(buffer, 60, input);
         split(buffer, &argc, argv);
         newProc = ExecV(argc, argv);
