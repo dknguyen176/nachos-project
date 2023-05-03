@@ -25,6 +25,21 @@ int _strcpy(char *dest, const char *src)
     return i;
 }
 
+int _strcmp(char *s1, char *s2)
+{
+    int i = 0;
+    while (s1[i] != '\0' && s2[i] != '\0')
+    {
+        if (s1[i] != s2[i])
+            return s1[i] < s2[i] ? -1 : 1;
+        i++;
+    }
+
+    if (s1[i] == '\0' && s2[i] == '\0') return 0;
+    if (s1[i] == '\0') return -1;
+    return 1;
+}
+
 void print(char *str)
 {
     int len;
@@ -34,16 +49,19 @@ void print(char *str)
     Write(msg, len, output);
 }
 
-void split(char *str, int *argc, char argv[][BUFFER_SIZE])
+void split(char *str)
 {
     int i = 0, j = 0, k = 0;
     while (str[i] != '\0')
     {
         if (str[i] == ' ')
         {
-            argv[j][k] = '\0';
-            j++;
-            k = 0;
+            if (k > 0)
+            {
+                argv[j][k] = '\0';
+                j++;
+                k = 0;
+            }
         }
         else
         {
@@ -52,8 +70,14 @@ void split(char *str, int *argc, char argv[][BUFFER_SIZE])
         }
         i++;
     }
-    argv[j][k] = '\0';
-    (*argc) = j + 1;
+
+    if (k > 0)
+    {
+        argv[j][k] = '\0';
+        j++;
+    }
+
+    argc = j;
 }
 
 int main()
@@ -66,7 +90,10 @@ int main()
     {
         print("shell> ");
         Read(buffer, 60, input);
-        split(buffer, &argc, argv);
+        split(buffer);
+
+        if (argc == 0) continue;
+        if (argc == 1 && _strcmp(argv[0], "exit") == 0) break;
         newProc = ExecV(argc, argv);
 
         if (newProc == -1)
@@ -78,13 +105,4 @@ int main()
             status = Join(newProc);
         }
     }
-
-    // for (i = 0; i < 5; ++i)
-    // {
-    //     _strcpy(buffer, "printtest");
-    //     newProc = Exec(buffer);
-    //     status = Join(newProc);
-
-    //     PrintInt(status);
-    // }
 }
