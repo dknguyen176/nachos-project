@@ -17,12 +17,12 @@ PCB::PCB(int id)
 
 PCB::~PCB()
 {
-    if (joinsem != NULL)
-        delete joinsem;
-    if (exitsem != NULL)
-        delete exitsem;
-    if (mutex != NULL)
-        delete mutex;
+    if (joinsem != NULL) delete joinsem;
+    if (exitsem != NULL) delete exitsem;
+    if (mutex != NULL) delete mutex;
+
+    if (thread != NULL && thread->space != NULL)
+        delete thread->space;
 }
 
 int PCB::Exec(char *filename, int pid)
@@ -78,7 +78,8 @@ void StartProcess(void *arg)
     char **argv = processArg->argv;
 
     char *filename = kernel->pTab->GetFileName(pid);
-    AddrSpace *space = new AddrSpace();
+    kernel->currentThread->space = new AddrSpace;
+    AddrSpace *space = kernel->currentThread->space;
     if (!space->Load(filename, argc, argv))
     {
         printf("\nError loading executable\n");

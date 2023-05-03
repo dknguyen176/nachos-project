@@ -96,6 +96,10 @@ OpenFile *FileSystem::Open(char *name, int type)
             return table[i];
         }
 
+    DEBUG(dbgFile, "User opened too many files\n");
+
+    cerr << "User opened too many files\n";
+
     return NULL; // Out of space
 }
 

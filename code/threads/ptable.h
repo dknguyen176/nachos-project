@@ -28,7 +28,9 @@ public:
     int GetFreeSlotAndSet();               // Find the free slot in PTable and set the slot to be used
     bool IsExist(int pid);                 // Check a process exist or not
     void Remove(int pid);                  // Delete the PID from the PTable
-    char *GetFileName(int id);             // Return the process name
+
+    // Get methods
+    char *GetFileName(int id); // Return the process name
 };
 
 #endif

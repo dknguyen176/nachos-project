@@ -124,6 +124,13 @@ bool AddrSpace::Allocate(char *filename, unsigned int size)
         bzero(&kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize], PageSize); // zero out the physical memory
     }
 
+    cerr << "Page table initialized\n";
+    for (int i = 0; i < numPages; i++)
+    {
+        cerr << pageTable[i].physicalPage << " ";
+    }
+    cerr << "\n";
+
     kernel->addrLock->V();
 
     return TRUE;
@@ -171,7 +178,7 @@ bool AddrSpace::Load(char *fileName, int argc, char **argv)
     // allocate space for the program
     if (!Allocate(fileName, size))
     {
-        delete executable;
+        kernel->fileSystem->CloseFile(executable->FileDescriptor()); // close file
         return FALSE;
     }
 
@@ -181,8 +188,8 @@ bool AddrSpace::Load(char *fileName, int argc, char **argv)
     // load the arguments into memory
     LoadArguments(argc, argv);
 
-    delete executable; // close file
-    return TRUE;       // success
+    kernel->fileSystem->CloseFile(executable->FileDescriptor()); // Close the file after checking its existence. // close file
+    return TRUE;                                                 // success
 }
 
 //----------------------------------------------------------------------

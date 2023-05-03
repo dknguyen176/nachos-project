@@ -64,12 +64,13 @@ Thread::Thread(char *threadName)
 
 Thread::~Thread()
 {
+    cerr << ">>> Deleting thread: " << name << endl;
+
     DEBUG(dbgThread, "Deleting thread: " << name);
 
     ASSERT(this != kernel->currentThread);
 
     delete name;
-    delete space;
 
     if (stack != NULL)
         DeallocBoundedArray((char *)stack, StackSize * sizeof(int));

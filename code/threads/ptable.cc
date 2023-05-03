@@ -31,19 +31,24 @@ PTable::~PTable()
 
 int PTable::ExecUpdate(char *filename)
 {
-    bmsem->P();           // Avoid loading 2 processes at the same time.
+    bmsem->P(); // Avoid loading 2 processes at the same time.
+
     if (filename == NULL) // Check the validity of the program "name".
     {
         printf("PTable::ExecUpdate Error -- File name is NULL\n");
         bmsem->V();
         return -1;
     }
-    if (kernel->fileSystem->Open(filename) == NULL) // Check the existence of the program "name" by calling the Open method of FileSystem class.
+
+    OpenFile *executable = kernel->fileSystem->Open(filename);
+    if (executable == NULL) // Check the existence of the program "name" by calling the Open method of FileSystem class.
     {
         printf("PTable::ExecUpdate Error -- File name is invalid\n");
         bmsem->V();
         return -1;
     }
+    kernel->fileSystem->CloseFile(executable->FileDescriptor()); // Close the file after checking its existence.
+
     if (strcmp(filename, kernel->pTab->GetFileName(kernel->currentThread->processID)) == 0) // Compare program name and currentThread name to make sure this program is not called Exec itself.
     {
         printf("PTable::ExecUpdate Error -- Can't execute itself\n");
@@ -70,19 +75,24 @@ int PTable::ExecUpdate(char *filename)
 
 int PTable::ExecVUpdate(char *filename, int argc, char **argv)
 {
-    bmsem->P();           // Avoid loading 2 processes at the same time.
+    bmsem->P(); // Avoid loading 2 processes at the same time.
+
     if (filename == NULL) // Check the validity of the program "name".
     {
         printf("PTable::ExecUpdate Error -- File name is NULL\n");
         bmsem->V();
         return -1;
     }
-    if (kernel->fileSystem->Open(filename) == NULL) // Check the existence of the program "name" by calling the Open method of FileSystem class.
+
+    OpenFile *executable = kernel->fileSystem->Open(filename);
+    if (executable == NULL) // Check the existence of the program "name" by calling the Open method of FileSystem class.
     {
         printf("PTable::ExecUpdate Error -- File name is invalid\n");
         bmsem->V();
         return -1;
     }
+    kernel->fileSystem->CloseFile(executable->FileDescriptor()); // Close the file after checking its existence.
+
     if (strcmp(filename, kernel->pTab->GetFileName(kernel->currentThread->processID)) == 0) // Compare program name and currentThread name to make sure this program is not called Exec itself.
     {
         printf("PTable::ExecUpdate Error -- Can't execute itself\n");
