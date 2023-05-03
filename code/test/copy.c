@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     char *filenameSrc, *filenameDst;
     char buffer[BUFFER_SIZE + 1], msg[BUFFER_SIZE + 1];
 
-    if (argc < 3)
+    if (argc < 3 || argc > 3)
     {
         len = _strcpy(msg, "Usage: copy <filenameSrc> <filenameDst>\n");
         Write(msg, len, _ConsoleOutput);

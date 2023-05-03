@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     char filecontent[BUFFER_SIZE + 1];
     char receiveMessage[BUFFER_SIZE + 1];
 
-    if (argc < 3)
+    if (argc < 3 || argc > 3)
     {
         len = _strcpy(msg, "Usage: fileclient <srcfilename> <dstfilename>");
         Write(msg, len, _ConsoleOutput);

@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     char *filename, buffer[BUFFER_SIZE + 1], msg[BUFFER_SIZE + 1];
     OpenFileId fd;
 
-    if (argc < 2)
+    if (argc < 2 || argc > 2)
     {
         len = _strcpy(msg, "Usage: cat <filename>\n");
         Write(msg, len, _ConsoleOutput);

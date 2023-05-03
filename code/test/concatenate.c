@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     char buffer2[BUFFER_SIZE + 1];
     char msg[BUFFER_SIZE + 1];
 
-    if (argc < 3)
+    if (argc < 3 || argc > 3)
     {
         len = _strcpy(msg, "Usage: concatenate <filename1> <filename2>\n");
         Write(msg, len, _ConsoleOutput);
