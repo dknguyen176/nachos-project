@@ -78,8 +78,7 @@ void StartProcess(void *arg)
     char **argv = processArg->argv;
 
     char *filename = kernel->pTab->GetFileName(pid);
-    kernel->currentThread->space = new AddrSpace;
-    AddrSpace *space = kernel->currentThread->space;
+    AddrSpace *space = new AddrSpace;
     if (!space->Load(filename, argc, argv))
     {
         printf("\nError loading executable\n");

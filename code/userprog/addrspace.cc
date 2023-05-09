@@ -212,24 +212,21 @@ void AddrSpace::LoadCodeAndData(OpenFile *executable, NoffHeader noffH)
     // load the code segment into memory
     for (int i = 0; i < noffH.code.size; i++)
     {
-        vaddr = noffH.code.virtualAddr + i;
-        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+        Translate(noffH.code.virtualAddr + i, &paddr, TRUE);
         executable->ReadAt(&(kernel->machine->mainMemory[paddr]), 1, noffH.code.inFileAddr + i);
     }
 
     // load the data segment into memory
     for (int i = 0; i < noffH.initData.size; i++)
     {
-        vaddr = noffH.initData.virtualAddr + i;
-        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+        Translate(noffH.initData.virtualAddr + i, &paddr, TRUE);
         executable->ReadAt(&(kernel->machine->mainMemory[paddr]), 1, noffH.initData.inFileAddr + i);
     }
 
     // zero out the uninitialized data segment
     for (int i = 0; i < noffH.uninitData.size; i++)
     {
-        vaddr = noffH.uninitData.virtualAddr + i;
-        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+        Translate(noffH.uninitData.virtualAddr + i, &paddr, TRUE);
         kernel->machine->mainMemory[paddr] = 0;
     }
 
@@ -237,8 +234,7 @@ void AddrSpace::LoadCodeAndData(OpenFile *executable, NoffHeader noffH)
     // load read only data segment
     for (int i = 0; i < noffH.readonlyData.size; i++)
     {
-        vaddr = noffH.readonlyData.virtualAddr + i;
-        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
+        Translate(noffH.readonlyData.virtualAddr + i, &paddr, TRUE);
         executable->ReadAt(&(kernel->machine->mainMemory[paddr]), 1, noffH.readonlyData.inFileAddr + i);
     }
 #endif
@@ -266,13 +262,14 @@ void AddrSpace::LoadArguments(int argc, char **argv)
         int len = strlen(argv[i]) + 1;
         for (int j = 0; j < len; ++j)
         {
-            paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
-            kernel->machine->mainMemory[paddr] = argv[i][j];
+            Translate(vaddr, &paddr, TRUE);
+            kernel->machine->mainMemory[paddr] = (unsigned char)(argv[i][j] & 0xff);
             vaddr++;
         }
     }
 
     // copy the string array into memory
+    ASSERT(sizeof(char *) == 4);
     vaddr = ptr - (argc + 1) * sizeof(char *);
     while (vaddr % 4 != 0) vaddr--;
     this->argv = vaddr;
@@ -280,18 +277,13 @@ void AddrSpace::LoadArguments(int argc, char **argv)
 
     for (int i = 0; i < argc; ++i)
     {
-        paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
-        *(unsigned int *)(&kernel->machine->mainMemory[paddr]) = ptr;
+        Translate(vaddr, &paddr, TRUE);
+        *(unsigned int *)(&kernel->machine->mainMemory[paddr]) = WordToMachine((unsigned int)ptr);
         vaddr += sizeof(char *);
         ptr += strlen(argv[i]) + 1;
     }
-    paddr = pageTable[vaddr / PageSize].physicalPage * PageSize + vaddr % PageSize;
-    *(unsigned int *)(&kernel->machine->mainMemory[paddr]) = (unsigned int)0;
-
-    // initialize the stack pointer
-    vaddr = this->argv - 4;
-    while (vaddr % 8 != 0) vaddr--;
-    this->stackptr = vaddr;
+    Translate(vaddr, &paddr, TRUE);
+    *(unsigned int *)(&kernel->machine->mainMemory[paddr]) = WordToMachine((unsigned int)0);
 }
 
 //----------------------------------------------------------------------
@@ -314,10 +306,6 @@ unsigned int AddrSpace::ArgumentSize(int argc, char **argv)
     ASSERT(sizeof(char *) == 4);
     vaddr = ptr - (argc + 1) * sizeof(char *);
     while (vaddr % 4 != 0) vaddr--;
-
-    // the stack pointer
-    vaddr = vaddr - 4;
-    while (vaddr % 8 != 0) vaddr--;
 
     return size - vaddr;
 }
@@ -377,8 +365,10 @@ void AddrSpace::InitRegisters()
     // Set the stack register to the end of the address space, where we
     // allocated the stack; but subtract off a bit, to make sure we don't
     // accidentally reference off the end!
-    machine->WriteRegister(StackReg, stackptr);
-    DEBUG(dbgAddr, "Initializing stack pointer: " << stackptr);
+    unsigned int topstack = argv - 16;
+    while (topstack % 8 != 0) topstack--;
+    machine->WriteRegister(StackReg, topstack);
+    DEBUG(dbgAddr, "Initializing stack pointer: " << topstack);
 
     // Set the argument registers
     machine->WriteRegister(4, argc);

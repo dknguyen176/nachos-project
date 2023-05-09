@@ -61,7 +61,7 @@ private:
     unsigned int numPages;       // Number of pages in the virtual
                                  // address space
 
-    unsigned int argc, argv, stackptr;
+    unsigned int argc, argv;
 
     void InitRegisters(); // Initialize user-level CPU registers,
                           // before jumping to user code
