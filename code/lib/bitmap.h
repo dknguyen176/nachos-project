@@ -33,29 +33,29 @@ const int BitsInWord = sizeof(unsigned int) * BitsInByte;
 class Bitmap
 {
 public:
-  Bitmap(int numItems); // Initialize a bitmap, with "numItems" bits
-                        // initially, all bits are cleared.
-  ~Bitmap();            // De-allocate bitmap
+    Bitmap(int numItems); // Initialize a bitmap, with "numItems" bits
+                          // initially, all bits are cleared.
+    ~Bitmap();            // De-allocate bitmap
 
-  void Mark(int which);       // Set the "nth" bit
-  void Clear(int which);      // Clear the "nth" bit
-  bool Test(int which) const; // Is the "nth" bit set?
-  int Find();                 // Find and return the index of the first clear bit
-  int FindAndSet();           // Return the # of a clear bit, and as a side
-                              // effect, set the bit.
-                              // If no bits are clear, return -1.
-  int NumClear() const;       // Return the number of clear bits
+    void Mark(int which);       // Set the "nth" bit
+    void Clear(int which);      // Clear the "nth" bit
+    bool Test(int which) const; // Is the "nth" bit set?
+    int Find();                 // Find and return the index of the first clear bit
+    int FindAndSet();           // Return the # of a clear bit, and as a side
+                                // effect, set the bit.
+                                // If no bits are clear, return -1.
+    int NumClear() const;       // Return the number of clear bits
 
-  void Print() const; // Print contents of bitmap
-  void SelfTest();    // Test whether bitmap is working
+    void Print() const; // Print contents of bitmap
+    void SelfTest();    // Test whether bitmap is working
 
 protected:
-  int numBits;       // number of bits in the bitmap
-  int numWords;      // number of words of bitmap storage
-                     // (rounded up if numBits is not a
-                     //  multiple of the number of bits in
-                     //  a word)
-  unsigned int *map; // bit storage
+    int numBits;       // number of bits in the bitmap
+    int numWords;      // number of words of bitmap storage
+                       // (rounded up if numBits is not a
+                       //  multiple of the number of bits in
+                       //  a word)
+    unsigned int *map; // bit storage
 };
 
 #endif // BITMAP_H

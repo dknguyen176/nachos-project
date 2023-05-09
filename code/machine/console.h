@@ -47,47 +47,47 @@
 class ConsoleInput : public CallBackObj
 {
 public:
-  ConsoleInput(char *readFile, CallBackObj *toCall);
-  // initialize hardware console input
-  ~ConsoleInput(); // clean up console emulation
+    ConsoleInput(char *readFile, CallBackObj *toCall);
+    // initialize hardware console input
+    ~ConsoleInput(); // clean up console emulation
 
-  char GetChar(); // Poll the console input.  If a char is
-                  // available, return it.  Otherwise, return EOF.
-                  // "callWhenAvail" is called whenever there is
-  // a char to be gotten
+    char GetChar(); // Poll the console input.  If a char is
+                    // available, return it.  Otherwise, return EOF.
+                    // "callWhenAvail" is called whenever there is
+    // a char to be gotten
 
-  void CallBack(); // Invoked when a character arrives
-                   // from the keyboard.
+    void CallBack(); // Invoked when a character arrives
+                     // from the keyboard.
 
 private:
-  int readFileNo;             // UNIX file emulating the keyboard
-  CallBackObj *callWhenAvail; // Interrupt handler to call when
-                              // there is a char to be read
-  char incoming;              // Contains the character to be read,
-                              // if there is one available.
-                              // Otherwise contains EOF.
+    int readFileNo;             // UNIX file emulating the keyboard
+    CallBackObj *callWhenAvail; // Interrupt handler to call when
+                                // there is a char to be read
+    char incoming;              // Contains the character to be read,
+                                // if there is one available.
+                                // Otherwise contains EOF.
 };
 
 class ConsoleOutput : public CallBackObj
 {
 public:
-  ConsoleOutput(char *writeFile, CallBackObj *toCall);
-  // initialize hardware console output
-  ~ConsoleOutput(); // clean up console emulation
+    ConsoleOutput(char *writeFile, CallBackObj *toCall);
+    // initialize hardware console output
+    ~ConsoleOutput(); // clean up console emulation
 
-  void PutChar(char ch); // Write "ch" to the console display,
-                         // and return immediately.  "callWhenDone"
-                         // will called when the I/O completes.
+    void PutChar(char ch); // Write "ch" to the console display,
+                           // and return immediately.  "callWhenDone"
+                           // will called when the I/O completes.
 
-  void CallBack(); // Invoked when next character can be put
-                   // out to the display.
+    void CallBack(); // Invoked when next character can be put
+                     // out to the display.
 
 private:
-  int writeFileNo;           // UNIX file emulating the display
-  CallBackObj *callWhenDone; // Interrupt handler to call when
-                             // the next char can be put
-  bool putBusy;              // Is a PutChar operation in progress?
-                             // If so, you can't do another one!
+    int writeFileNo;           // UNIX file emulating the display
+    CallBackObj *callWhenDone; // Interrupt handler to call when
+                               // the next char can be put
+    bool putBusy;              // Is a PutChar operation in progress?
+                               // If so, you can't do another one!
 };
 
 #endif // CONSOLE_H

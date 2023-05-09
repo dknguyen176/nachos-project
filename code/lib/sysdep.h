@@ -58,11 +58,11 @@ extern bool Unlink(char *name);
 // These are assumed to be portable, so we don't include a wrapper.
 extern "C"
 {
-  int atoi(const char *str);
-  double atof(const char *str);
-  int abs(int i);
-  void bcopy(const void *s1, void *s2, size_t n);
-  void bzero(void *s, size_t n);
+    int atoi(const char *str);
+    double atof(const char *str);
+    int abs(int i);
+    void bcopy(const void *s1, void *s2, size_t n);
+    void bzero(void *s, size_t n);
 }
 
 // Interprocess communication operations, for simulating the network

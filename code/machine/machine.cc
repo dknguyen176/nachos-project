@@ -26,8 +26,7 @@ static char *exceptionNames[] = {"no exception", "syscall",
 
 static void CheckEndian()
 {
-    union checkit
-    {
+    union checkit {
         char charword[4];
         unsigned int intword;
     } check;

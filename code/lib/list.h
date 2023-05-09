@@ -28,9 +28,9 @@ template <class T>
 class ListElement
 {
 public:
-  ListElement(T itm); // initialize a list element
-  ListElement *next;  // next element on list, NULL if this is last
-  T item;             // item on the list
+    ListElement(T itm); // initialize a list element
+    ListElement *next;  // next element on list, NULL if this is last
+    T item;             // item on the list
 };
 
 // The following class defines a "list" -- a singly linked list of
@@ -46,39 +46,42 @@ template <class T>
 class List
 {
 public:
-  List();          // initialize the list
-  virtual ~List(); // de-allocate the list
+    List();          // initialize the list
+    virtual ~List(); // de-allocate the list
 
-  virtual void Prepend(T item); // Put item at the beginning of the list
-  virtual void Append(T item);  // Put item at the end of the list
+    virtual void Prepend(T item); // Put item at the beginning of the list
+    virtual void Append(T item);  // Put item at the end of the list
 
-  T Front() { return first->item; }
-  // Return first item on list
-  // without removing it
-  T RemoveFront();     // Take item off the front of the list
-  void Remove(T item); // Remove specific item from list
+    T Front() { return first->item; }
 
-  bool IsInList(T item) const; // is the item in the list?
+    // Return first item on list
+    // without removing it
+    T RemoveFront();     // Take item off the front of the list
+    void Remove(T item); // Remove specific item from list
 
-  unsigned int NumInList() { return numInList; };
-  // how many items in the list?
-  bool IsEmpty() { return (numInList == 0); };
-  // is the list empty?
+    bool IsInList(T item) const; // is the item in the list?
 
-  void Apply(void (*f)(T)) const;
-  // apply function to all elements in list
+    unsigned int NumInList() { return numInList; };
 
-  virtual void SanityCheck() const;
-  // has this list been corrupted?
-  void SelfTest(T *p, int numEntries);
-  // verify module is working
+    // how many items in the list?
+    bool IsEmpty() { return (numInList == 0); };
+
+    // is the list empty?
+
+    void Apply(void (*f)(T)) const;
+    // apply function to all elements in list
+
+    virtual void SanityCheck() const;
+    // has this list been corrupted?
+    void SelfTest(T *p, int numEntries);
+    // verify module is working
 
 protected:
-  ListElement<T> *first; // Head of the list, NULL if list is empty
-  ListElement<T> *last;  // Last element of list
-  int numInList;         // number of elements in list
+    ListElement<T> *first; // Head of the list, NULL if list is empty
+    ListElement<T> *last;  // Last element of list
+    int numInList;         // number of elements in list
 
-  friend class ListIterator<T>;
+    friend class ListIterator<T>;
 };
 
 // The following class defines a "sorted list" -- a singly linked list of
@@ -95,21 +98,23 @@ template <class T>
 class SortedList : public List<T>
 {
 public:
-  SortedList(int (*comp)(T x, T y)) : List<T>() { compare = comp; };
-  ~SortedList(){}; // base class destructor called automatically
+    SortedList(int (*comp)(T x, T y)) : List<T>() { compare = comp; };
 
-  void Insert(T item); // insert an item onto the list in sorted order
+    ~SortedList(){}; // base class destructor called automatically
 
-  void SanityCheck() const; // has this list been corrupted?
-  void SelfTest(T *p, int numEntries);
-  // verify module is working
+    void Insert(T item); // insert an item onto the list in sorted order
+
+    void SanityCheck() const; // has this list been corrupted?
+    void SelfTest(T *p, int numEntries);
+    // verify module is working
 
 private:
-  int (*compare)(T x, T y); // function for sorting list elements
+    int (*compare)(T x, T y); // function for sorting list elements
 
-  void Prepend(T item) { Insert(item); } // *pre*pending has no meaning
-                                         //	in a sorted list
-  void Append(T item) { Insert(item); }  // neither does *ap*pend
+    void Prepend(T item) { Insert(item); } // *pre*pending has no meaning
+                                           //	in a sorted list
+
+    void Append(T item) { Insert(item); } // neither does *ap*pend
 };
 
 // The following class can be used to step through a list.
@@ -124,24 +129,28 @@ template <class T>
 class ListIterator
 {
 public:
-  ListIterator(List<T> *list) { current = list->first; }
-  // initialize an iterator
+    ListIterator(List<T> *list) { current = list->first; }
 
-  bool IsDone() { return current == NULL; };
-  // return TRUE if we are at the end of the list
+    // initialize an iterator
 
-  T Item()
-  {
-    ASSERT(!IsDone());
-    return current->item;
-  };
-  // return current element on list
+    bool IsDone() { return current == NULL; };
 
-  void Next() { current = current->next; };
-  // update iterator to point to next
+    // return TRUE if we are at the end of the list
+
+    T Item()
+    {
+        ASSERT(!IsDone());
+        return current->item;
+    };
+
+    // return current element on list
+
+    void Next() { current = current->next; };
+
+    // update iterator to point to next
 
 private:
-  ListElement<T> *current; // where we are in the list
+    ListElement<T> *current; // where we are in the list
 };
 
 #include "list.cc" // templates are really like macros

@@ -38,8 +38,8 @@
 #include "openfile.h"
 
 #ifdef FILESYS_STUB // Temporarily implement file system calls as
-										// calls to UNIX, until the real file system
-										// implementation is available
+                    // calls to UNIX, until the real file system
+                    // implementation is available
 
 typedef int OpenFileID;
 
@@ -48,49 +48,49 @@ typedef int OpenFileID;
 class FileSystem
 {
 public:
-	FileSystem();
+    FileSystem();
 
-	bool Create(char *name);
+    bool Create(char *name);
 
-	OpenFile *Open(char *name, int type = 0);
-	OpenFile *Find(int id);
-	OpenFile *Find(char *name);
-	bool Remove(char *name);
-	int CloseFile(OpenFileID id);
+    OpenFile *Open(char *name, int type = 0);
+    OpenFile *Find(int id);
+    OpenFile *Find(char *name);
+    bool Remove(char *name);
+    int CloseFile(OpenFileID id);
 
-	OpenFile *SocketOpen();
+    OpenFile *SocketOpen();
 
 private:
-	OpenFile *table[TABLESIZE];
+    OpenFile *table[TABLESIZE];
 };
 
 #else // FILESYS
 class FileSystem
 {
 public:
-	FileSystem(bool format); // Initialize the file system.
-													 // Must be called *after* "synchDisk"
-													 // has been initialized.
-													 // If "format", there is nothing on
-													 // the disk, so initialize the directory
-													 // and the bitmap of free blocks.
+    FileSystem(bool format); // Initialize the file system.
+                             // Must be called *after* "synchDisk"
+                             // has been initialized.
+                             // If "format", there is nothing on
+                             // the disk, so initialize the directory
+                             // and the bitmap of free blocks.
 
-	bool Create(char *name, int initialSize);
-	// Create a file (UNIX creat)
+    bool Create(char *name, int initialSize);
+    // Create a file (UNIX creat)
 
-	OpenFile *Open(char *name); // Open a file (UNIX open)
+    OpenFile *Open(char *name); // Open a file (UNIX open)
 
-	bool Remove(char *name); // Delete a file (UNIX unlink)
+    bool Remove(char *name); // Delete a file (UNIX unlink)
 
-	void List(); // List all the files in the file system
+    void List(); // List all the files in the file system
 
-	void Print(); // List all the files and their contents
+    void Print(); // List all the files and their contents
 
 private:
-	OpenFile *freeMapFile;	 // Bit map of free disk blocks,
-													 // represented as a file
-	OpenFile *directoryFile; // "Root" directory -- list of
-													 // file names, represented as a file
+    OpenFile *freeMapFile;   // Bit map of free disk blocks,
+                             // represented as a file
+    OpenFile *directoryFile; // "Root" directory -- list of
+                             // file names, represented as a file
 };
 
 #endif // FILESYS

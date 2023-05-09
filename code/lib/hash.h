@@ -43,57 +43,60 @@ template <class Key, class T>
 class HashTable
 {
 public:
-  HashTable(Key (*get)(T x), unsigned (*hFunc)(Key x));
-  // initialize a hash table
-  ~HashTable(); // deallocate a hash table
+    HashTable(Key (*get)(T x), unsigned (*hFunc)(Key x));
+    // initialize a hash table
+    ~HashTable(); // deallocate a hash table
 
-  void Insert(T item); // Put item into hash table
-  T Remove(Key key);   // Remove item from hash table.
+    void Insert(T item); // Put item into hash table
+    T Remove(Key key);   // Remove item from hash table.
 
-  bool Find(Key key, T *itemPtr) const;
-  // Find an item from its key
-  bool IsInTable(Key key)
-  {
-    T dummy;
-    return Find(key, &dummy);
-  }
-  // Is the item in the table?
+    bool Find(Key key, T *itemPtr) const;
 
-  bool IsEmpty() { return numItems == 0; }
-  // does the table have anything in it
+    // Find an item from its key
+    bool IsInTable(Key key)
+    {
+        T dummy;
+        return Find(key, &dummy);
+    }
 
-  void Apply(void (*f)(T)) const;
-  // apply function to all elements in table
+    // Is the item in the table?
 
-  void SanityCheck() const; // is this still a legal hash table?
-  void SelfTest(T *p, int numItems);
-  // is the module working?
+    bool IsEmpty() { return numItems == 0; }
+
+    // does the table have anything in it
+
+    void Apply(void (*f)(T)) const;
+    // apply function to all elements in table
+
+    void SanityCheck() const; // is this still a legal hash table?
+    void SelfTest(T *p, int numItems);
+    // is the module working?
 
 private:
-  typedef List<T> *Bucket;
+    typedef List<T> *Bucket;
 
-  Bucket *buckets; // the array of hash buckets
-  int numBuckets;  // the number of buckets
-  int numItems;    // the number of items in the table
+    Bucket *buckets; // the array of hash buckets
+    int numBuckets;  // the number of buckets
+    int numItems;    // the number of items in the table
 
-  Key (*getKey)(T x);      // get Key from value
-  unsigned (*hash)(Key x); // the hash function
+    Key (*getKey)(T x);      // get Key from value
+    unsigned (*hash)(Key x); // the hash function
 
-  void InitBuckets(int size); // initialize bucket array
-  void DeleteBuckets(Bucket *table, int size);
-  // deallocate bucket array
+    void InitBuckets(int size); // initialize bucket array
+    void DeleteBuckets(Bucket *table, int size);
+    // deallocate bucket array
 
-  int HashValue(Key key) const;
-  // which bucket does the key hash to?
+    int HashValue(Key key) const;
+    // which bucket does the key hash to?
 
-  void ReHash(); // expand the hash table
+    void ReHash(); // expand the hash table
 
-  bool FindInBucket(int bucket, Key key, T *itemPtr) const;
-  // find item in bucket
-  int FindNextFullBucket(int start) const;
-  // find next full bucket starting from this one
+    bool FindInBucket(int bucket, Key key, T *itemPtr) const;
+    // find item in bucket
+    int FindNextFullBucket(int start) const;
+    // find next full bucket starting from this one
 
-  friend class HashIterator<Key, T>;
+    friend class HashIterator<Key, T>;
 };
 
 // The following class can be used to step through a hash table --
@@ -108,28 +111,32 @@ template <class Key, class T>
 class HashIterator
 {
 public:
-  HashIterator(HashTable<Key, T> *table); // initialize an iterator
-  ~HashIterator()
-  {
-    if (bucketIter != NULL)
-      delete bucketIter;
-  };
-  // destruct an iterator
+    HashIterator(HashTable<Key, T> *table); // initialize an iterator
 
-  bool IsDone() { return (bucket == table->numBuckets); };
-  // return TRUE if no more items in table
-  T Item()
-  {
-    ASSERT(!IsDone());
-    return bucketIter->Item();
-  };
-  // return current item in table
-  void Next(); // update iterator to point to next
+    ~HashIterator()
+    {
+        if (bucketIter != NULL)
+            delete bucketIter;
+    };
+
+    // destruct an iterator
+
+    bool IsDone() { return (bucket == table->numBuckets); };
+
+    // return TRUE if no more items in table
+    T Item()
+    {
+        ASSERT(!IsDone());
+        return bucketIter->Item();
+    };
+
+    // return current item in table
+    void Next(); // update iterator to point to next
 
 private:
-  HashTable<Key, T> *table;    // the hash table we're stepping through
-  int bucket;                  // current bucket we are in
-  ListIterator<T> *bucketIter; // where we are in the bucket
+    HashTable<Key, T> *table;    // the hash table we're stepping through
+    int bucket;                  // current bucket we are in
+    ListIterator<T> *bucketIter; // where we are in the bucket
 };
 
 #include "hash.cc" // templates are really like macros

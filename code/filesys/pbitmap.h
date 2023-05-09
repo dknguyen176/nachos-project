@@ -24,13 +24,13 @@
 class PersistentBitmap : public Bitmap
 {
 public:
-  PersistentBitmap(OpenFile *file, int numItems); // initialize bitmap from disk
-  PersistentBitmap(int numItems);                 // or don't...
+    PersistentBitmap(OpenFile *file, int numItems); // initialize bitmap from disk
+    PersistentBitmap(int numItems);                 // or don't...
 
-  ~PersistentBitmap(); // deallocate bitmap
+    ~PersistentBitmap(); // deallocate bitmap
 
-  void FetchFrom(OpenFile *file); // read bitmap from the disk
-  void WriteBack(OpenFile *file); // write bitmap contents to disk
+    void FetchFrom(OpenFile *file); // read bitmap from the disk
+    void WriteBack(OpenFile *file); // write bitmap contents to disk
 };
 
 #endif // PBITMAP_H
