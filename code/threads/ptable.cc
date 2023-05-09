@@ -136,7 +136,7 @@ int PTable::ExitUpdate(int ec)
     int parentID = pcb[pid]->GetParentID();
     pcb[pid]->SetExitCode(ec);    // Set exit code for the currentThread
     pcb[parentID]->DecNumWait();  // Decrement numwait
-    pcb[parentID]->JoinRelease(); // Release the parent process, which called JoinWait()
+    pcb[pid]->JoinRelease(); // Release the parent process, which called JoinWait()
 
     pcb[pid]->ExitWait(); // Wait until the parent process calls ExitRelease()
 
@@ -159,7 +159,7 @@ int PTable::JoinUpdate(int id)
 
     int parentID = pcb[id]->GetParentID();
     pcb[parentID]->IncNumWait();     // Increment numwait
-    pcb[parentID]->JoinWait();       // Wait for the child process to execute.
+    pcb[id]->JoinWait();       // Wait for the child process to execute.
     int ec = pcb[id]->GetExitCode(); // Get the exit code of the child process
     pcb[id]->ExitRelease();          // Release the child process
 
