@@ -9,7 +9,6 @@ PCB::PCB(int id)
     joinsem = new Semaphore("joinsem", 0);
     exitsem = new Semaphore("exitsem", 0);
     mutex = new Semaphore("mutex", 1);
-    thread = NULL;
 
     exitcode = 0;
     numwait = 0;
@@ -20,15 +19,12 @@ PCB::~PCB()
     if (joinsem != NULL) delete joinsem;
     if (exitsem != NULL) delete exitsem;
     if (mutex != NULL) delete mutex;
-
-    if (thread != NULL && thread->space != NULL)
-        delete thread->space;
 }
 
 int PCB::Exec(char *filename, int pid)
 {
     mutex->P(); // Call mutex->P() to help avoid loading 2 processes at the same time
-    thread = new Thread(filename);
+    Thread *thread = new Thread(filename);
     if (thread == NULL)
     {
         printf("PCB::Exec Error -- Not enough memory\n");
@@ -50,7 +46,7 @@ int PCB::Exec(char *filename, int pid)
 int PCB::ExecV(char *filename, int pid, int argc, char **argv)
 {
     mutex->P(); // Call mutex->P() to help avoid loading 2 processes at the same time
-    thread = new Thread(filename);
+    Thread *thread = new Thread(filename);
     if (thread == NULL)
     {
         printf("PCB::Exec Error -- Not enough memory\n");

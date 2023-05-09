@@ -24,7 +24,6 @@ private:
     int pid;           // The process ID
     int parentID;      // The parent process’s ID
     char filename[50]; // The process name
-    Thread *thread;    // the thread for this process
 
 public:
     PCB(int id); // Constructor

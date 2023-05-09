@@ -73,6 +73,9 @@ Thread::~Thread()
 
     if (stack != NULL)
         DeallocBoundedArray((char *)stack, StackSize * sizeof(int));
+
+    if (space != NULL)
+        delete space;
 }
 
 //----------------------------------------------------------------------
